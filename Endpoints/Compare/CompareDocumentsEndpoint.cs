@@ -1,7 +1,6 @@
 using FastEndpoints;
 using Docxodus;
 using DocumentFormat.OpenXml.Packaging;
-using System.IO.Compression;
 using System.Xml.Linq;
 
 namespace RedlineApi.Endpoints.Compare;
@@ -15,9 +14,9 @@ public class CompareRequest
 
 public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
 {
-    // PowerTools namespace that causes Word warnings
+    // PowerTools namespace that can cause Word warnings if not properly handled
     private static readonly XNamespace Pt14 = "http://powertools.codeplex.com/2011";
-    private static readonly XNamespace Rel = "http://schemas.openxmlformats.org/package/2006/relationships";
+    private static readonly XNamespace Mc = "http://schemas.openxmlformats.org/markup-compatibility/2006";
 
     public override void Configure()
     {
@@ -60,8 +59,10 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             // Perform comparison
             var result = WmlComparer.Compare(originalDoc, modifiedDoc, settings);
 
-            // Clean the output to remove PowerTools internal attributes and fix relationships
-            var cleanedBytes = CleanDocument(result.DocumentByteArray);
+            // Clean the output to remove PowerTools internal namespace/attributes
+            // Note: We only clean pt14 namespace. GUID-style relationship IDs are valid per OOXML spec.
+            // DO NOT modify relationship IDs without also updating all references in document content!
+            var cleanedBytes = CleanPowerToolsNamespace(result.DocumentByteArray);
 
             // Return the redlined document
             await Send.BytesAsync(
@@ -80,19 +81,20 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     }
 
     /// <summary>
-    /// Cleans the document to remove PowerTools internal attributes and fix relationship issues
+    /// Removes PowerTools (pt14) internal namespace and attributes from the document.
+    /// This prevents Word from showing "unreadable content" warnings for unrecognized namespaces.
     /// </summary>
-    private static byte[] CleanDocument(byte[] docBytes)
+    private static byte[] CleanPowerToolsNamespace(byte[] docBytes)
     {
         using var stream = new MemoryStream();
         stream.Write(docBytes, 0, docBytes.Length);
         stream.Position = 0;
 
-        // First pass: Clean XML parts using OpenXML SDK
         using (var doc = WordprocessingDocument.Open(stream, true))
         {
             if (doc.MainDocumentPart != null)
             {
+                // Clean all XML parts that may contain pt14 attributes
                 CleanXmlPart(doc.MainDocumentPart);
 
                 if (doc.MainDocumentPart.StyleDefinitionsPart != null)
@@ -118,22 +120,20 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             }
         }
 
-        // Second pass: Fix relationships using ZipArchive
         stream.Position = 0;
-        var fixedBytes = FixRelationshipsWithZip(stream.ToArray());
-
-        return fixedBytes;
+        return stream.ToArray();
     }
 
     /// <summary>
-    /// Removes pt14 namespace and attributes from an XML part
+    /// Removes pt14 namespace declarations and attributes from an XML part.
     /// </summary>
     private static void CleanXmlPart(OpenXmlPart part)
     {
         using var partStream = part.GetStream(FileMode.Open, FileAccess.ReadWrite);
         var xdoc = XDocument.Load(partStream);
+        var modified = false;
 
-        // Remove all pt14 attributes from all elements
+        // Remove all pt14-namespaced attributes from all elements
         foreach (var element in xdoc.Descendants())
         {
             var pt14Attrs = element.Attributes()
@@ -141,112 +141,49 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 .ToList();
 
             foreach (var attr in pt14Attrs)
+            {
                 attr.Remove();
+                modified = true;
+            }
         }
 
-        // Remove pt14 namespace declaration from root
+        // Clean up root element
         var root = xdoc.Root;
         if (root != null)
         {
+            // Remove pt14 namespace declaration (xmlns:pt14="...")
             var nsDeclarations = root.Attributes()
                 .Where(a => a.IsNamespaceDeclaration && a.Value == Pt14.NamespaceName)
                 .ToList();
 
             foreach (var ns in nsDeclarations)
-                ns.Remove();
-
-            // Also remove pt14 from mc:Ignorable attribute if present
-            var mcIgnorable = root.Attribute(XName.Get("Ignorable", "http://schemas.openxmlformats.org/markup-compatibility/2006"));
-            if (mcIgnorable != null)
             {
-                var values = mcIgnorable.Value.Split(' ')
+                ns.Remove();
+                modified = true;
+            }
+
+            // Remove pt14 from mc:Ignorable attribute if present
+            var mcIgnorable = root.Attribute(Mc + "Ignorable");
+            if (mcIgnorable != null && mcIgnorable.Value.Contains("pt14"))
+            {
+                var values = mcIgnorable.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                     .Where(v => v != "pt14")
                     .ToArray();
-                mcIgnorable.Value = string.Join(" ", values);
-            }
-        }
 
-        // Save back
-        partStream.SetLength(0);
-        xdoc.Save(partStream);
-    }
-
-    /// <summary>
-    /// Fixes relationship issues using ZipArchive: converts GUID-style IDs to rIdN format
-    /// and absolute paths to relative paths
-    /// </summary>
-    private static byte[] FixRelationshipsWithZip(byte[] docBytes)
-    {
-        using var inputStream = new MemoryStream(docBytes);
-        using var outputStream = new MemoryStream();
-
-        using (var archive = new ZipArchive(inputStream, ZipArchiveMode.Read))
-        using (var outputArchive = new ZipArchive(outputStream, ZipArchiveMode.Create, true))
-        {
-            foreach (var entry in archive.Entries)
-            {
-                var newEntry = outputArchive.CreateEntry(entry.FullName, CompressionLevel.Optimal);
-
-                using var entryStream = entry.Open();
-                using var newEntryStream = newEntry.Open();
-
-                // Fix relationship files
-                if (entry.FullName.EndsWith(".rels"))
-                {
-                    var xdoc = XDocument.Load(entryStream);
-                    FixRelationshipsXml(xdoc);
-                    xdoc.Save(newEntryStream);
-                }
+                if (values.Length > 0)
+                    mcIgnorable.Value = string.Join(" ", values);
                 else
-                {
-                    entryStream.CopyTo(newEntryStream);
-                }
+                    mcIgnorable.Remove();
+
+                modified = true;
             }
         }
 
-        return outputStream.ToArray();
-    }
-
-    /// <summary>
-    /// Fixes the relationships XML document
-    /// </summary>
-    private static void FixRelationshipsXml(XDocument relsDoc)
-    {
-        if (relsDoc.Root == null)
-            return;
-
-        var relationships = relsDoc.Root.Elements(Rel + "Relationship").ToList();
-        int nextId = 1;
-
-        // Find the highest existing rId number
-        foreach (var rel in relationships)
+        // Only save if we made changes
+        if (modified)
         {
-            var id = rel.Attribute("Id")?.Value;
-            if (id != null && id.StartsWith("rId") && int.TryParse(id[3..], out int num))
-            {
-                if (num >= nextId)
-                    nextId = num + 1;
-            }
-        }
-
-        foreach (var rel in relationships)
-        {
-            var idAttr = rel.Attribute("Id");
-            var targetAttr = rel.Attribute("Target");
-
-            if (idAttr == null) continue;
-
-            // Fix GUID-style IDs (like R76e2e2db410345d5)
-            if (!idAttr.Value.StartsWith("rId"))
-            {
-                idAttr.Value = $"rId{nextId++}";
-            }
-
-            // Fix absolute paths (like /word/footnotes.xml -> footnotes.xml)
-            if (targetAttr != null && targetAttr.Value.StartsWith("/word/"))
-            {
-                targetAttr.Value = targetAttr.Value[6..]; // Remove "/word/"
-            }
+            partStream.SetLength(0);
+            xdoc.Save(partStream);
         }
     }
 }
