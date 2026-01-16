@@ -68,12 +68,14 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             var result = WmlComparer.Compare(originalDoc, modifiedDoc, settings);
 
             LogValidationResults("Docxodus raw output", result.DocumentByteArray, Logger);
+            LogPackageIntegrity("Docxodus raw output", result.DocumentByteArray, Logger);
             TryLogSourceOfTruth(Logger);
 
             // Clean the output to remove PowerTools internal attributes and fix relationships
             var cleanedBytes = CleanDocument(result.DocumentByteArray, message => Logger.LogInformation(message));
 
             LogValidationResults("Cleaned output", cleanedBytes, Logger);
+            LogPackageIntegrity("Cleaned output", cleanedBytes, Logger);
 
             // Return the redlined document
             await Send.BytesAsync(
@@ -674,10 +676,268 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         {
             var bytes = File.ReadAllBytes(sourceOfTruthPath);
             LogValidationResults("Source of truth", bytes, logger);
+            LogPackageIntegrity("Source of truth", bytes, logger);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to read source of truth");
         }
+    }
+
+    private static void LogPackageIntegrity(string label, byte[] docBytes, ILogger logger)
+    {
+        try
+        {
+            using var stream = new MemoryStream(docBytes);
+            using var archive = new ZipArchive(stream, ZipArchiveMode.Read, true);
+
+            var entries = archive.Entries
+                .Where(entry => !string.IsNullOrEmpty(entry.FullName))
+                .ToList();
+            var entryNames = entries.Select(entry => entry.FullName).ToList();
+            var entrySet = new HashSet<string>(entryNames, StringComparer.OrdinalIgnoreCase);
+
+            LogDuplicateEntries(label, entryNames, logger);
+            LogContentTypeIssues(label, entries, entrySet, logger);
+
+            foreach (var relEntry in entries.Where(entry => entry.FullName.EndsWith(".rels", StringComparison.OrdinalIgnoreCase)))
+            {
+                using var relStream = relEntry.Open();
+                var relsDoc = XDocument.Load(relStream);
+                LogRelationshipIssues(label, relsDoc, relEntry.FullName, entrySet, logger);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed package integrity check for {Label}", label);
+        }
+    }
+
+    private static void LogDuplicateEntries(string label, List<string> entryNames, ILogger logger)
+    {
+        var exactDuplicates = entryNames
+            .GroupBy(name => name)
+            .Where(group => group.Count() > 1)
+            .ToList();
+
+        foreach (var group in exactDuplicates.Take(MaxValidationErrorsToLog))
+        {
+            logger.LogWarning("{Label}: Duplicate zip entry {Entry} (x{Count})", label, group.Key, group.Count());
+        }
+
+        var caseInsensitiveDuplicates = entryNames
+            .GroupBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .Where(group => group.Distinct(StringComparer.Ordinal).Count() > 1)
+            .ToList();
+
+        foreach (var group in caseInsensitiveDuplicates.Take(MaxValidationErrorsToLog))
+        {
+            var variants = string.Join(", ", group.Distinct(StringComparer.Ordinal));
+            logger.LogWarning(
+                "{Label}: Case-colliding zip entries ({Count}) for {Entry}: {Variants}",
+                label,
+                group.Count(),
+                group.Key,
+                variants);
+        }
+    }
+
+    private static void LogContentTypeIssues(
+        string label,
+        List<ZipArchiveEntry> entries,
+        HashSet<string> entrySet,
+        ILogger logger)
+    {
+        var contentTypesEntry = entries.FirstOrDefault(entry => entry.FullName == "[Content_Types].xml");
+        if (contentTypesEntry == null)
+        {
+            logger.LogWarning("{Label}: Missing [Content_Types].xml", label);
+            return;
+        }
+
+        using var contentTypesStream = contentTypesEntry.Open();
+        var contentTypesDoc = XDocument.Load(contentTypesStream);
+        var root = contentTypesDoc.Root;
+        if (root == null)
+        {
+            logger.LogWarning("{Label}: [Content_Types].xml has no root", label);
+            return;
+        }
+
+        var ns = root.Name.Namespace;
+        var overrides = root.Elements(ns + "Override")
+            .Select(element => element.Attribute("PartName")?.Value)
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value!.Trim())
+            .ToList();
+
+        var defaults = root.Elements(ns + "Default")
+            .Select(element => element.Attribute("Extension")?.Value)
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value!.Trim())
+            .ToList();
+
+        var duplicateOverrides = overrides
+            .GroupBy(value => value, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .ToList();
+
+        foreach (var group in duplicateOverrides.Take(MaxValidationErrorsToLog))
+        {
+            logger.LogWarning("{Label}: Duplicate content type override for {Part} (x{Count})", label, group.Key, group.Count());
+        }
+
+        var duplicateDefaults = defaults
+            .GroupBy(value => value, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .ToList();
+
+        foreach (var group in duplicateDefaults.Take(MaxValidationErrorsToLog))
+        {
+            logger.LogWarning("{Label}: Duplicate content type default for extension {Extension} (x{Count})", label, group.Key, group.Count());
+        }
+
+        var overrideParts = overrides
+            .Select(value => value.TrimStart('/'))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var defaultExtensions = defaults
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var missingOverrideParts = overrides
+            .Select(value => value.TrimStart('/'))
+            .Where(part => !entrySet.Contains(part))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        foreach (var part in missingOverrideParts.Take(MaxValidationErrorsToLog))
+        {
+            logger.LogWarning("{Label}: Content type override references missing part {Part}", label, part);
+        }
+
+        var entriesMissingContentTypes = entries
+            .Select(entry => entry.FullName)
+            .Where(name => name != "[Content_Types].xml")
+            .Where(name => !overrideParts.Contains(name))
+            .Where(name =>
+            {
+                var extension = Path.GetExtension(name).TrimStart('.');
+                return string.IsNullOrEmpty(extension) || !defaultExtensions.Contains(extension);
+            })
+            .ToList();
+
+        foreach (var part in entriesMissingContentTypes.Take(MaxValidationErrorsToLog))
+        {
+            logger.LogWarning("{Label}: Missing content type for part {Part}", label, part);
+        }
+    }
+
+    private static void LogRelationshipIssues(
+        string label,
+        XDocument relsDoc,
+        string relsPath,
+        HashSet<string> entrySet,
+        ILogger logger)
+    {
+        if (relsDoc.Root == null)
+        {
+            logger.LogWarning("{Label}: Relationships file {RelsPath} has no root", label, relsPath);
+            return;
+        }
+
+        var baseFolder = GetBaseFolderForRelsFile(relsPath);
+        var relationships = relsDoc.Root.Elements(Rel + "Relationship").ToList();
+
+        var duplicateIds = relationships
+            .Select(rel => rel.Attribute("Id")?.Value)
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .GroupBy(id => id!, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .ToList();
+
+        foreach (var group in duplicateIds.Take(MaxValidationErrorsToLog))
+        {
+            logger.LogWarning(
+                "{Label}: Duplicate relationship Id {Id} (x{Count}) in {RelsPath}",
+                label,
+                group.Key,
+                group.Count(),
+                relsPath);
+        }
+
+        var issueCount = 0;
+        foreach (var rel in relationships)
+        {
+            var targetAttr = rel.Attribute("Target");
+            if (targetAttr == null || string.IsNullOrWhiteSpace(targetAttr.Value))
+            {
+                logger.LogWarning("{Label}: Empty relationship target in {RelsPath}", label, relsPath);
+                if (++issueCount >= MaxValidationErrorsToLog)
+                    break;
+                continue;
+            }
+
+            var targetMode = rel.Attribute("TargetMode")?.Value;
+            if (string.Equals(targetMode, "External", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var resolvedTarget = ResolveTargetPath(targetAttr.Value, baseFolder, out var escapedRoot);
+            if (escapedRoot)
+            {
+                logger.LogWarning(
+                    "{Label}: Relationship target escapes package root in {RelsPath}: {Target}",
+                    label,
+                    relsPath,
+                    targetAttr.Value);
+                if (++issueCount >= MaxValidationErrorsToLog)
+                    break;
+            }
+
+            if (string.IsNullOrWhiteSpace(resolvedTarget) || !entrySet.Contains(resolvedTarget))
+            {
+                logger.LogWarning(
+                    "{Label}: Missing relationship target in {RelsPath}: {Target} -> {Resolved}",
+                    label,
+                    relsPath,
+                    targetAttr.Value,
+                    resolvedTarget);
+                if (++issueCount >= MaxValidationErrorsToLog)
+                    break;
+            }
+        }
+    }
+
+    private static string ResolveTargetPath(string target, string baseFolder, out bool escapedRoot)
+    {
+        escapedRoot = false;
+        var normalizedTarget = target.Replace('\\', '/');
+
+        string combined;
+        if (normalizedTarget.StartsWith("/"))
+            combined = normalizedTarget.TrimStart('/');
+        else if (string.IsNullOrEmpty(baseFolder))
+            combined = normalizedTarget;
+        else
+            combined = baseFolder + normalizedTarget;
+
+        var segments = new List<string>();
+        foreach (var segment in combined.Split('/', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (segment == ".")
+                continue;
+
+            if (segment == "..")
+            {
+                if (segments.Count == 0)
+                    escapedRoot = true;
+                else
+                    segments.RemoveAt(segments.Count - 1);
+                continue;
+            }
+
+            segments.Add(segment);
+        }
+
+        return string.Join("/", segments);
     }
 }
