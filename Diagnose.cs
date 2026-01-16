@@ -45,7 +45,7 @@ class Diagnose
     static void ExamineDocx(string path)
     {
         Console.WriteLine($"File: {path}");
-        using var archive = ZipArchive.OpenRead(path);
+        using var archive = ZipFile.OpenRead(path);
 
         // List all entries
         Console.WriteLine($"\nEntries ({archive.Entries.Count} total):");
