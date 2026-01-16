@@ -632,4 +632,52 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             ? $"_rels/{fileName}.rels"
             : $"{directory}/_rels/{fileName}.rels";
     }
+
+    /// <summary>
+    /// Validates a document and logs any errors found
+    /// </summary>
+    private static void LogValidationResults(string label, byte[] docBytes, ILogger logger)
+    {
+        try
+        {
+            using var stream = new MemoryStream(docBytes);
+            using var doc = WordprocessingDocument.Open(stream, false);
+            var validator = new OpenXmlValidator(FileFormatVersions.Office2021);
+            var errors = validator.Validate(doc).ToList();
+
+            logger.LogInformation("{Label}: Found {Count} validation errors", label, errors.Count);
+            foreach (var error in errors.Take(MaxValidationErrorsToLog))
+            {
+                logger.LogWarning("  - {Description} | Part: {Part} | XPath: {XPath}",
+                    error.Description, error.Part?.Uri, error.Path?.XPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to validate {Label}", label);
+        }
+    }
+
+    /// <summary>
+    /// Attempts to validate the source of truth file for comparison
+    /// </summary>
+    private static void TryLogSourceOfTruth(ILogger logger)
+    {
+        const string sourceOfTruthPath = "/Users/arthrod/temp/Manual Library/temp/redline-endpoint/redline_source_of_truth.docx";
+        if (!File.Exists(sourceOfTruthPath))
+        {
+            logger.LogInformation("Source of truth file not found at {Path}", sourceOfTruthPath);
+            return;
+        }
+
+        try
+        {
+            var bytes = File.ReadAllBytes(sourceOfTruthPath);
+            LogValidationResults("Source of truth", bytes, logger);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to read source of truth");
+        }
+    }
 }

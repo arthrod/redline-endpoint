@@ -139,6 +139,24 @@ private static string NormalizeTargetPath(string absolutePath, string baseFolder
 
 ---
 
+## Attempt 5: Orphaned Notes Parts Removal + Path Simplification
+
+**What we tried:**
+- Remove orphaned footnotes/endnotes parts (when no references exist)
+- Simplify redundant relative paths like `../word/footnotes.xml` → `footnotes.xml`
+- Added OpenXML SDK validation logging
+
+**Result:** ❌ Still showed warning
+
+**Key discovery:** Both raw Docxodus output AND cleaned output show 0 validation errors from OpenXML SDK validator (Office2021), yet Word still shows the warning. This means the issue is something Word checks but the SDK doesn't validate:
+- Possibly ZIP structure/compression
+- Possibly XML encoding/BOM issues
+- Possibly some subtle namespace or attribute ordering
+
+**Root cause confirmed:** Raw Docxodus output itself triggers the warning - the issue originates in Docxodus, not our cleanup code.
+
+---
+
 ## Root Cause Analysis
 
 The Docxodus/WmlComparer library (based on OpenXmlPowerTools) introduces two types of issues:
