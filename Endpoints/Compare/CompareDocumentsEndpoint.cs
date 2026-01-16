@@ -697,15 +697,27 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             var entryNames = entries.Select(entry => entry.FullName).ToList();
             var entrySet = new HashSet<string>(entryNames, StringComparer.OrdinalIgnoreCase);
 
-            LogDuplicateEntries(label, entryNames, logger);
-            LogContentTypeIssues(label, entries, entrySet, logger);
+            var duplicateIssues = LogDuplicateEntries(label, entryNames, logger);
+            var contentTypeIssues = LogContentTypeIssues(label, entries, entrySet, logger);
+            var relIssues = 0;
+            var relCount = 0;
 
             foreach (var relEntry in entries.Where(entry => entry.FullName.EndsWith(".rels", StringComparison.OrdinalIgnoreCase)))
             {
+                relCount++;
                 using var relStream = relEntry.Open();
                 var relsDoc = XDocument.Load(relStream);
-                LogRelationshipIssues(label, relsDoc, relEntry.FullName, entrySet, logger);
+                relIssues += LogRelationshipIssues(label, relsDoc, relEntry.FullName, entrySet, logger);
             }
+
+            logger.LogInformation(
+                "{Label}: Package integrity summary. Entries={EntryCount}, Relationships={RelCount}, DuplicateIssues={DuplicateIssues}, ContentTypeIssues={ContentTypeIssues}, RelationshipIssues={RelIssues}",
+                label,
+                entries.Count,
+                relCount,
+                duplicateIssues,
+                contentTypeIssues,
+                relIssues);
         }
         catch (Exception ex)
         {
@@ -713,8 +725,9 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         }
     }
 
-    private static void LogDuplicateEntries(string label, List<string> entryNames, ILogger logger)
+    private static int LogDuplicateEntries(string label, List<string> entryNames, ILogger logger)
     {
+        var issues = 0;
         var exactDuplicates = entryNames
             .GroupBy(name => name)
             .Where(group => group.Count() > 1)
@@ -722,6 +735,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
 
         foreach (var group in exactDuplicates.Take(MaxValidationErrorsToLog))
         {
+            issues++;
             logger.LogWarning("{Label}: Duplicate zip entry {Entry} (x{Count})", label, group.Key, group.Count());
         }
 
@@ -740,20 +754,24 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 group.Count(),
                 group.Key,
                 variants);
+            issues++;
         }
+
+        return issues;
     }
 
-    private static void LogContentTypeIssues(
+    private static int LogContentTypeIssues(
         string label,
         List<ZipArchiveEntry> entries,
         HashSet<string> entrySet,
         ILogger logger)
     {
+        var issues = 0;
         var contentTypesEntry = entries.FirstOrDefault(entry => entry.FullName == "[Content_Types].xml");
         if (contentTypesEntry == null)
         {
             logger.LogWarning("{Label}: Missing [Content_Types].xml", label);
-            return;
+            return ++issues;
         }
 
         using var contentTypesStream = contentTypesEntry.Open();
@@ -762,7 +780,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         if (root == null)
         {
             logger.LogWarning("{Label}: [Content_Types].xml has no root", label);
-            return;
+            return ++issues;
         }
 
         var ns = root.Name.Namespace;
@@ -786,6 +804,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         foreach (var group in duplicateOverrides.Take(MaxValidationErrorsToLog))
         {
             logger.LogWarning("{Label}: Duplicate content type override for {Part} (x{Count})", label, group.Key, group.Count());
+            issues++;
         }
 
         var duplicateDefaults = defaults
@@ -796,6 +815,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         foreach (var group in duplicateDefaults.Take(MaxValidationErrorsToLog))
         {
             logger.LogWarning("{Label}: Duplicate content type default for extension {Extension} (x{Count})", label, group.Key, group.Count());
+            issues++;
         }
 
         var overrideParts = overrides
@@ -813,6 +833,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         foreach (var part in missingOverrideParts.Take(MaxValidationErrorsToLog))
         {
             logger.LogWarning("{Label}: Content type override references missing part {Part}", label, part);
+            issues++;
         }
 
         var entriesMissingContentTypes = entries
@@ -829,20 +850,24 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         foreach (var part in entriesMissingContentTypes.Take(MaxValidationErrorsToLog))
         {
             logger.LogWarning("{Label}: Missing content type for part {Part}", label, part);
+            issues++;
         }
+
+        return issues;
     }
 
-    private static void LogRelationshipIssues(
+    private static int LogRelationshipIssues(
         string label,
         XDocument relsDoc,
         string relsPath,
         HashSet<string> entrySet,
         ILogger logger)
     {
+        var issues = 0;
         if (relsDoc.Root == null)
         {
             logger.LogWarning("{Label}: Relationships file {RelsPath} has no root", label, relsPath);
-            return;
+            return ++issues;
         }
 
         var baseFolder = GetBaseFolderForRelsFile(relsPath);
@@ -863,6 +888,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 group.Key,
                 group.Count(),
                 relsPath);
+            issues++;
         }
 
         var issueCount = 0;
@@ -872,6 +898,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             if (targetAttr == null || string.IsNullOrWhiteSpace(targetAttr.Value))
             {
                 logger.LogWarning("{Label}: Empty relationship target in {RelsPath}", label, relsPath);
+                issues++;
                 if (++issueCount >= MaxValidationErrorsToLog)
                     break;
                 continue;
@@ -889,6 +916,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                     label,
                     relsPath,
                     targetAttr.Value);
+                issues++;
                 if (++issueCount >= MaxValidationErrorsToLog)
                     break;
             }
@@ -901,10 +929,13 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                     relsPath,
                     targetAttr.Value,
                     resolvedTarget);
+                issues++;
                 if (++issueCount >= MaxValidationErrorsToLog)
                     break;
             }
         }
+
+        return issues;
     }
 
     private static string ResolveTargetPath(string target, string baseFolder, out bool escapedRoot)

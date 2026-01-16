@@ -1,0 +1,24 @@
+Using launch settings from /Users/arthrod/temp/Manual Library/temp/redline-endpoint/Properties/launchSettings.json...
+Building...
+info: FastEndpoints.StartupTimer[1]
+      Registered 1 endpoints in 49 milliseconds.
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5000
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/arthrod/temp/Manual Library/temp/redline-endpoint
+info: RedlineApi.Endpoints.Compare.CompareDocumentsEndpoint[0]
+      Docxodus raw output: Found 0 validation errors
+info: RedlineApi.Endpoints.Compare.CompareDocumentsEndpoint[0]
+      Source of truth: Found 0 validation errors
+info: RedlineApi.Endpoints.Compare.CompareDocumentsEndpoint[0]
+      Footnote references: 0. Endnote references: 0.
+info: RedlineApi.Endpoints.Compare.CompareDocumentsEndpoint[0]
+      Removing footnotes part (no references found).
+info: RedlineApi.Endpoints.Compare.CompareDocumentsEndpoint[0]
+      Removing endnotes part (no references found).
+info: RedlineApi.Endpoints.Compare.CompareDocumentsEndpoint[0]
+      Cleaned output: Found 0 validation errors
