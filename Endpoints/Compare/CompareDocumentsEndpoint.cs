@@ -125,7 +125,82 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         }
 
         stream.Position = 0;
-        return stream.ToArray();
+        var result = stream.ToArray();
+
+        // Post-process to fix relationship absolute paths using ZipArchive
+        result = FixRelationshipPathsInZip(result, log);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Fixes absolute paths in .rels files using ZipArchive.
+    /// Converts /word/something.xml to something.xml.
+    /// </summary>
+    private static byte[] FixRelationshipPathsInZip(byte[] docBytes, Action<string>? log)
+    {
+        using var inputStream = new MemoryStream(docBytes);
+        using var outputStream = new MemoryStream();
+
+        using (var archive = new System.IO.Compression.ZipArchive(inputStream, System.IO.Compression.ZipArchiveMode.Read))
+        using (var outputArchive = new System.IO.Compression.ZipArchive(outputStream, System.IO.Compression.ZipArchiveMode.Create, true))
+        {
+            int fixedCount = 0;
+            var relsNs = XNamespace.Get("http://schemas.openxmlformats.org/package/2006/relationships");
+
+            foreach (var entry in archive.Entries)
+            {
+                var newEntry = outputArchive.CreateEntry(entry.FullName, System.IO.Compression.CompressionLevel.Optimal);
+
+                using var entryStream = entry.Open();
+                using var newEntryStream = newEntry.Open();
+
+                if (entry.FullName.EndsWith(".rels", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Process .rels file
+                    var xdoc = XDocument.Load(entryStream, LoadOptions.PreserveWhitespace);
+                    bool changed = false;
+
+                    foreach (var rel in xdoc.Descendants(relsNs + "Relationship"))
+                    {
+                        var targetAttr = rel.Attribute("Target");
+                        if (targetAttr == null)
+                            continue;
+
+                        var target = targetAttr.Value;
+
+                        // Check if it's an absolute path (starts with /)
+                        if (target.StartsWith("/word/"))
+                        {
+                            // Convert /word/something.xml to something.xml
+                            targetAttr.Value = target.Substring(6); // Remove "/word/"
+                            fixedCount++;
+                            changed = true;
+                        }
+                    }
+
+                    // Save with proper settings (no BOM)
+                    var settings = new System.Xml.XmlWriterSettings
+                    {
+                        Encoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+                        Indent = false,
+                        OmitXmlDeclaration = false,
+                        NewLineHandling = System.Xml.NewLineHandling.None
+                    };
+                    using var writer = System.Xml.XmlWriter.Create(newEntryStream, settings);
+                    xdoc.Save(writer);
+                }
+                else
+                {
+                    // Copy other files as-is
+                    entryStream.CopyTo(newEntryStream);
+                }
+            }
+
+            log?.Invoke($"Fixed relationship paths. Converted={fixedCount} absolute paths to relative.");
+        }
+
+        return outputStream.ToArray();
     }
 
     /// <summary>
