@@ -44,7 +44,7 @@ Would become broken references, **causing** the "unreadable content" warning ins
 ## Attempted Solutions
 
 ### Attempt 1: Remove pt14 Namespace Only
-- **Status:** ✅ Correct approach
+- **Status:** ✅ Correct approach (partial)
 - Removes `pt14:Unid` and `pt14:Status` attributes
 - Removes `xmlns:pt14="..."` namespace declaration
 - Removes `pt14` from `mc:Ignorable` attribute
@@ -56,21 +56,46 @@ Would become broken references, **causing** the "unreadable content" warning ins
 - **Status:** ❌ BUGGY - breaks document by changing IDs without updating references
 - This approach was **removed** as it was likely causing the issue, not fixing it
 
+### Attempt 4: Fix wp:docPr/@id Uniqueness
+- **Status:** ✅ Implemented
+- **Root Cause:** `wp:docPr/@id` (non-visual drawing properties) must be unique across the whole DOCX
+- Collisions commonly happen between headers/footers and the main document when merging/comparing
+- This is documented as the direct cause of "unreadable content" in python-docx, docx4j, and other libraries
+- **Fix:** Renumber every `<wp:docPr id="...">` across all XML parts with sequential unique IDs
+- This is low risk because `wp:docPr/@id` is not referenced elsewhere in the DOCX
+
+### Attempt 5: Fix w14:paraId/textId Duplicates
+- **Status:** ✅ Implemented (defensive hardening)
+- `w14:paraId` and `w14:textId` must be unique within their scope and < 0x80000000
+- Comparison engines that clone/duplicate paragraph content can create duplicates
+- **Fix:** Detect and regenerate duplicate IDs with valid random hex values
+
 ---
 
-## Current Solution (Simplified)
+## Current Solution
 
-The current implementation only removes the pt14 namespace, which is the only known issue that could cause Word warnings:
+The current implementation performs three cleanup operations:
+
+1. **Remove pt14 namespace** - PowerTools internal namespace/attributes
+2. **Fix wp:docPr/@id uniqueness** - Renumber drawing property IDs across all XML parts
+3. **Fix w14:paraId/textId duplicates** - Regenerate duplicate paragraph/text IDs
 
 ```csharp
-private static byte[] CleanPowerToolsNamespace(byte[] docBytes)
+private static byte[] CleanDocument(byte[] docBytes, Action<string>? log = null)
 {
-    // Only clean pt14 namespace - don't touch relationships!
-    // GUID-style relationship IDs are valid per OOXML spec.
+    // 1. Clean pt14 namespace from all parts
+    // 2. Fix Word-enforced uniqueness constraints
+    FixWordUniquenessConstraints(doc, log);
+}
+
+private static void FixWordUniquenessConstraints(WordprocessingDocument doc, Action<string>? log)
+{
+    FixDocPrIds(doc, log);        // Fix wp:docPr/@id globally
+    FixDuplicateParaIds(doc, log); // Fix w14:paraId/textId per-part
 }
 ```
 
-**Key insight:** If the raw Docxodus output (before any cleaning) opens in Word without warnings, then the previous "cleaning" was actually breaking the document. Test the raw output first before adding any cleaning logic.
+**Key insight:** OpenXmlValidator reports 0 errors because these are Word-enforced constraints, not schema validation errors. The `wp:docPr/@id` collision is the most common cause of "unreadable content" warnings across DOCX libraries.
 
 ---
 
@@ -107,3 +132,7 @@ python3 diagnose.py output.docx
 - [Docxodus GitHub](https://github.com/JSv4/Docxodus)
 - [OpenXmlPowerTools Issues](https://github.com/OfficeDev/Open-Xml-PowerTools/issues) - archived
 - [Open XML SDK Issue #715](https://github.com/OfficeDev/Open-XML-SDK/issues/715) - illegal URI can break parsing
+- [python-docx corruption after adding images](https://github.com/python-openxml/python-docx/issues) - traced to wp:docPr id clash
+- [docx4j "Word found unreadable content"](https://github.com/plutext/docx4j/issues) - header shape + image collision
+- [docx4j forum: wp:docPr/@id uniqueness](https://www.docx4java.org/forums/) - explicit guidance on uniqueness requirement
+- [dolanmiu/docx wp:docPr issue](https://github.com/dolanmiu/docx/issues) - same root cause leading to Word error
