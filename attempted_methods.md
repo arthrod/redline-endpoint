@@ -482,7 +482,38 @@ xmlContent = xmlContent.Replace(" />", "/>");
 
 ---
 
+## Attempt 21: ROOT CAUSE FOUND - Duplicate Revision IDs (2026-01-16)
+
+**Discovery:** The `w:id` attribute used in revision tags (`<w:ins>`, `<w:del>`, `<w:moveFrom>`, `<w:moveTo>`, `<w:moveFromRangeStart>`, `<w:moveToRangeStart>`) must be **UNIQUE across the ENTIRE document.xml file**.
+
+According to the Office Open XML Standard (ECMA-376), the `w:id` attribute serves as a unique identifier for that specific change annotation within the document. These IDs must be unique across ALL revision elements.
+
+**The Error: Duplicate Revision IDs**
+
+The corrupted file contains duplicate IDs, which causes Word's XML parser to fail:
+
+**Conflict 1 (ID="21"):**
+- In Paragraph 415A102B: `<w:moveFrom w:id="21" ...>`
+- In Paragraph 6F192513: `<w:del w:id="21" ...>`
+- Result: Two different revisions claim to be ID #21
+
+**Conflict 2 (ID="18"):**
+- In Paragraph 7AF0C292: `<w:moveFromRangeStart w:id="18" ...>`
+- In Paragraph 07253A41: `<w:del w:id="18" ...>`
+- Result: Two different annotations claim to be ID #18
+
+**Why this matters:**
+- The diff between WORKING and corrupted shows the "plus" version fixes these issues by renumbering IDs
+- e.g., the deletion in paragraph 6F192513 is changed from `w:id="21"` to `w:id="29"`
+- The WORKING file has all unique IDs; the corrupted file has duplicates
+
+**Solution:** Post-process document.xml to ensure all `w:id` attributes on revision elements are globally unique.
+
+---
+
 ## Current Status
+
+**ROOT CAUSE IDENTIFIED:** ✅ Duplicate `w:id` values across revision elements
 
 **Ruled out causes:**
 1. ❌ XML declaration format (uppercase UTF-8, standalone=yes)
@@ -496,11 +527,15 @@ xmlContent = xmlContent.Replace(" />", "/>");
 
 **What works:** `TEST_with_working_docxml.docx` - copying Word-repaired document.xml into our package
 
-**Remaining difference:** The actual ID VALUES themselves:
-- WORKING: `w14:paraId="4B9BA395"`, `w:rsidR="006E1EB0"`
-- Ours: `w14:paraId="702AAE95"`, `w:rsidR="00911519"`
-
-**Unknown:** Why the specific ID values matter, or what else differs between the files
+**Fix needed:** Ensure unique `w:id` values across all revision elements:
+- `w:ins`
+- `w:del`
+- `w:moveFrom`
+- `w:moveTo`
+- `w:moveFromRangeStart`
+- `w:moveFromRangeEnd`
+- `w:moveToRangeStart`
+- `w:moveToRangeEnd`
 
 ---
 
