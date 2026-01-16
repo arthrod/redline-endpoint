@@ -1448,8 +1448,91 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     /// </summary>
     private static void FixWordInvariants(WordprocessingDocument doc, string author, Action<string>? log)
     {
+        EnsureParagraphIds(doc, log);
         EnsureTableCellsHaveAtLeastOneParagraph(doc, log);
         EnsureCommentPartsExistIfReferenced(doc, author, log);
+    }
+
+    /// <summary>
+    /// Ensures all paragraphs have w14:paraId and w14:textId attributes.
+    /// Word requires these for proper tracked changes handling.
+    /// </summary>
+    private static void EnsureParagraphIds(WordprocessingDocument doc, Action<string>? log)
+    {
+        var main = doc.MainDocumentPart;
+        if (main == null) return;
+
+        // Generate a consistent rsidR value for this document
+        var rsidR = GenerateRsid();
+        var totalAdded = 0;
+
+        foreach (var root in EnumerateStoryRoots(main))
+        {
+            var added = 0;
+            foreach (var para in root.Descendants<Paragraph>())
+            {
+                // Check if paraId already exists
+                var existingParaId = para.GetAttributes()
+                    .FirstOrDefault(a => a.LocalName == "paraId" &&
+                        a.NamespaceUri == "http://schemas.microsoft.com/office/word/2010/wordml");
+
+                if (existingParaId.Value == null)
+                {
+                    // Add w14:paraId
+                    para.SetAttribute(new OpenXmlAttribute(
+                        "w14", "paraId",
+                        "http://schemas.microsoft.com/office/word/2010/wordml",
+                        GenerateParaId()));
+
+                    // Add w14:textId
+                    para.SetAttribute(new OpenXmlAttribute(
+                        "w14", "textId",
+                        "http://schemas.microsoft.com/office/word/2010/wordml",
+                        "77777777"));
+
+                    // Add w:rsidR if not present
+                    if (para.RsidParagraphAddition == null)
+                        para.RsidParagraphAddition = rsidR;
+
+                    // Add w:rsidRDefault if not present
+                    if (para.RsidRunAdditionDefault == null)
+                        para.RsidRunAdditionDefault = "00000000";
+
+                    added++;
+                }
+            }
+
+            if (added > 0)
+                root.Save();
+
+            totalAdded += added;
+        }
+
+        if (totalAdded > 0)
+            log?.Invoke($"Added paragraph IDs (w14:paraId/textId) to {totalAdded} paragraphs.");
+    }
+
+    private static readonly Random _random = new();
+
+    /// <summary>
+    /// Generates a unique 8-character hex paragraph ID.
+    /// Value must be less than 0x80000000 per OOXML spec.
+    /// </summary>
+    private static string GenerateParaId()
+    {
+        int value;
+        lock (_random) { value = _random.Next(0x00000001, 0x7FFFFFFF); }
+        return value.ToString("X8");
+    }
+
+    /// <summary>
+    /// Generates an 8-character hex revision save ID
+    /// </summary>
+    private static string GenerateRsid()
+    {
+        int value;
+        lock (_random) { value = _random.Next(0x00100000, 0x7FFFFFFF); }
+        return value.ToString("X8");
     }
 
     /// <summary>
