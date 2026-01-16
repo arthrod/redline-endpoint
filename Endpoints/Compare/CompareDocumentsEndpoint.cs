@@ -1500,6 +1500,141 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         NormalizeTrackedChangeDates(doc, log);
         EnsureTableCellsHaveAtLeastOneParagraph(doc, log);
         EnsureCommentPartsExistIfReferenced(doc, author, log);
+        EnsureUniqueRevisionIds(doc, log);
+    }
+
+    /// <summary>
+    /// Ensures all revision w:id attributes are unique across the document.
+    /// According to ECMA-376, w:id on revision elements must be unique within document.xml.
+    /// Docxodus sometimes generates duplicate IDs (e.g., w:moveFrom and w:del both with id="21").
+    /// </summary>
+    private static void EnsureUniqueRevisionIds(WordprocessingDocument doc, Action<string>? log)
+    {
+        var main = doc.MainDocumentPart;
+        if (main == null) return;
+
+        var totalReassigned = 0;
+
+        foreach (var root in EnumerateStoryRoots(main))
+        {
+            // Collect all revision elements with w:id attributes
+            var revisionElements = new List<OpenXmlElement>();
+
+            revisionElements.AddRange(root.Descendants<DeletedRun>());
+            revisionElements.AddRange(root.Descendants<InsertedRun>());
+            revisionElements.AddRange(root.Descendants<Deleted>());
+            revisionElements.AddRange(root.Descendants<Inserted>());
+            revisionElements.AddRange(root.Descendants<MoveFromRun>());
+            revisionElements.AddRange(root.Descendants<MoveToRun>());
+            revisionElements.AddRange(root.Descendants<MoveFromRangeStart>());
+            revisionElements.AddRange(root.Descendants<MoveFromRangeEnd>());
+            revisionElements.AddRange(root.Descendants<MoveToRangeStart>());
+            revisionElements.AddRange(root.Descendants<MoveToRangeEnd>());
+
+            // Track used IDs and find duplicates
+            var usedIds = new HashSet<string>(StringComparer.Ordinal);
+            var elementsToReassign = new List<OpenXmlElement>();
+            var maxId = 0;
+
+            foreach (var element in revisionElements)
+            {
+                var idValue = GetRevisionId(element);
+                if (idValue == null) continue;
+
+                if (int.TryParse(idValue, out var numericId))
+                {
+                    maxId = Math.Max(maxId, numericId);
+                }
+
+                if (usedIds.Contains(idValue))
+                {
+                    // Duplicate found - mark for reassignment
+                    elementsToReassign.Add(element);
+                }
+                else
+                {
+                    usedIds.Add(idValue);
+                }
+            }
+
+            // Reassign duplicate IDs
+            var nextId = maxId + 1;
+            foreach (var element in elementsToReassign)
+            {
+                var newId = nextId.ToString();
+                SetRevisionId(element, newId);
+                usedIds.Add(newId);
+                nextId++;
+                totalReassigned++;
+            }
+
+            if (elementsToReassign.Count > 0)
+                root.Save();
+        }
+
+        if (totalReassigned > 0)
+            log?.Invoke($"Reassigned {totalReassigned} duplicate revision IDs to ensure uniqueness.");
+    }
+
+    /// <summary>
+    /// Gets the w:id attribute value from a revision element
+    /// </summary>
+    private static string? GetRevisionId(OpenXmlElement element)
+    {
+        return element switch
+        {
+            DeletedRun del => del.Id?.Value,
+            InsertedRun ins => ins.Id?.Value,
+            Deleted d => d.Id?.Value,
+            Inserted i => i.Id?.Value,
+            MoveFromRun mf => mf.Id?.Value,
+            MoveToRun mt => mt.Id?.Value,
+            MoveFromRangeStart mfrs => mfrs.Id?.Value,
+            MoveFromRangeEnd mfre => mfre.Id?.Value,
+            MoveToRangeStart mtrs => mtrs.Id?.Value,
+            MoveToRangeEnd mtre => mtre.Id?.Value,
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Sets the w:id attribute value on a revision element
+    /// </summary>
+    private static void SetRevisionId(OpenXmlElement element, string newId)
+    {
+        switch (element)
+        {
+            case DeletedRun del:
+                del.Id = newId;
+                break;
+            case InsertedRun ins:
+                ins.Id = newId;
+                break;
+            case Deleted d:
+                d.Id = newId;
+                break;
+            case Inserted i:
+                i.Id = newId;
+                break;
+            case MoveFromRun mf:
+                mf.Id = newId;
+                break;
+            case MoveToRun mt:
+                mt.Id = newId;
+                break;
+            case MoveFromRangeStart mfrs:
+                mfrs.Id = newId;
+                break;
+            case MoveFromRangeEnd mfre:
+                mfre.Id = newId;
+                break;
+            case MoveToRangeStart mtrs:
+                mtrs.Id = newId;
+                break;
+            case MoveToRangeEnd mtre:
+                mtre.Id = newId;
+                break;
+        }
     }
 
     /// <summary>
