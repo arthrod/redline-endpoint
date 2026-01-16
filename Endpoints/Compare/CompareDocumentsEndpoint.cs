@@ -6,6 +6,8 @@ using DocumentFormat.OpenXml.Validation;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.Extensions.Logging;
 using System.IO.Compression;
+using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace RedlineApi.Endpoints.Compare;
@@ -213,9 +215,53 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 uriAttr.Value = "http://schemas.openxmlformats.org/drawingml/2006/picture";
         }
 
-        // Save back
+        // Save back with Word-compatible XML format
         partStream.SetLength(0);
-        xdoc.Save(partStream);
+        SaveXDocumentForWord(xdoc, partStream);
+    }
+
+    /// <summary>
+    /// Saves XDocument with Word-compatible XML formatting:
+    /// - XML declaration: encoding="UTF-8" standalone="yes"
+    /// - Proper UTF-8 encoding (uppercase in declaration)
+    /// </summary>
+    private static void SaveXDocumentForWord(XDocument xdoc, Stream stream)
+    {
+        // Word requires:
+        // 1. Uppercase "UTF-8" and standalone="yes" in XML declaration
+        // 2. No space before /> in self-closing tags (Word writes <w:jc/>, not <w:jc />)
+        var encoding = new UTF8Encoding(false); // UTF-8 without BOM
+
+        // First, write to a temporary buffer
+        using var tempStream = new MemoryStream();
+
+        // Write the rest of the document without declaration
+        var settings = new XmlWriterSettings
+        {
+            Encoding = encoding,
+            Indent = true,
+            IndentChars = "  ",
+            NewLineChars = "\r\n",
+            OmitXmlDeclaration = true
+        };
+
+        using (var writer = XmlWriter.Create(tempStream, settings))
+        {
+            xdoc.Save(writer);
+        }
+
+        // Get the XML content and fix self-closing tags
+        var xmlContent = encoding.GetString(tempStream.ToArray());
+        xmlContent = xmlContent.Replace(" />", "/>");
+
+        // Write the XML declaration manually with uppercase UTF-8
+        var declaration = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n";
+        var declBytes = encoding.GetBytes(declaration);
+        stream.Write(declBytes, 0, declBytes.Length);
+
+        // Write the fixed content
+        var contentBytes = encoding.GetBytes(xmlContent);
+        stream.Write(contentBytes, 0, contentBytes.Length);
     }
 
     /// <summary>
@@ -272,10 +318,15 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                     using var contentStream = new MemoryStream(content);
                     var xdoc = XDocument.Load(contentStream);
                     FixRelationshipsXml(xdoc, entryPath, idMappings.GetValueOrDefault(entryPath));
-                    xdoc.Save(newEntryStream);
+                    SaveXDocumentForWord(xdoc, newEntryStream);
                 }
                 else if (IsContentPartWithRelationships(entryPath))
                 {
+                    // ALWAYS rewrite word/*.xml files with proper XML declaration
+                    // Word requires encoding="UTF-8" (uppercase) and standalone="yes"
+                    using var contentStream = new MemoryStream(content);
+                    var xdoc = XDocument.Load(contentStream);
+
                     // Find the corresponding .rels file for this content part
                     var relsPath = GetRelsPathForContentPart(entryPath);
                     var mapping = idMappings.GetValueOrDefault(relsPath);
@@ -283,15 +334,11 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                     if (mapping != null && mapping.Count > 0)
                     {
                         // Update r:* references in the content part
-                        using var contentStream = new MemoryStream(content);
-                        var xdoc = XDocument.Load(contentStream);
                         UpdateRelationshipReferences(xdoc, mapping);
-                        xdoc.Save(newEntryStream);
                     }
-                    else
-                    {
-                        newEntryStream.Write(content, 0, content.Length);
-                    }
+
+                    // Always save with Word-compatible XML format
+                    SaveXDocumentForWord(xdoc, newEntryStream);
                 }
                 else
                 {
@@ -1448,10 +1495,128 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     /// </summary>
     private static void FixWordInvariants(WordprocessingDocument doc, string author, Action<string>? log)
     {
+        DeduplicateMoveOperations(doc, log);
         EnsureParagraphIds(doc, log);
         NormalizeTrackedChangeDates(doc, log);
         EnsureTableCellsHaveAtLeastOneParagraph(doc, log);
         EnsureCommentPartsExistIfReferenced(doc, author, log);
+    }
+
+    /// <summary>
+    /// Deduplicates move operations by w:name attribute.
+    /// Docxodus creates multiple moveFrom/moveTo with the same name, but Word expects only one pair per name.
+    /// Also keeps only one MoveFromRun and one MoveToRun per unique move.
+    /// </summary>
+    private static void DeduplicateMoveOperations(WordprocessingDocument doc, Action<string>? log)
+    {
+        var main = doc.MainDocumentPart;
+        if (main == null) return;
+
+        var totalRemoved = 0;
+
+        foreach (var root in EnumerateStoryRoots(main))
+        {
+            // Track which move names we've seen for RangeStart elements
+            var seenMoveFromNames = new HashSet<string>();
+            var seenMoveToNames = new HashSet<string>();
+            // Track valid RangeStart IDs (ones we're keeping)
+            var validMoveFromRangeIds = new HashSet<string>();
+            var validMoveToRangeIds = new HashSet<string>();
+
+            // Process MoveFromRangeStart - keep first per name, remove duplicates
+            var moveFromStarts = root.Descendants<MoveFromRangeStart>().ToList();
+            foreach (var el in moveFromStarts)
+            {
+                var name = el.Name?.Value;
+                var id = el.Id?.Value;
+                if (string.IsNullOrEmpty(name)) continue;
+
+                if (seenMoveFromNames.Contains(name))
+                {
+                    // Remove duplicate RangeStart and its RangeEnd
+                    if (id != null)
+                    {
+                        var rangeEnd = root.Descendants<MoveFromRangeEnd>()
+                            .FirstOrDefault(e => e.Id?.Value == id);
+                        rangeEnd?.Remove();
+                        totalRemoved++;
+                    }
+                    el.Remove();
+                    totalRemoved++;
+                }
+                else
+                {
+                    seenMoveFromNames.Add(name);
+                    if (id != null) validMoveFromRangeIds.Add(id);
+                }
+            }
+
+            // Process MoveToRangeStart - keep first per name, remove duplicates
+            var moveToStarts = root.Descendants<MoveToRangeStart>().ToList();
+            foreach (var el in moveToStarts)
+            {
+                var name = el.Name?.Value;
+                var id = el.Id?.Value;
+                if (string.IsNullOrEmpty(name)) continue;
+
+                if (seenMoveToNames.Contains(name))
+                {
+                    // Remove duplicate RangeStart and its RangeEnd
+                    if (id != null)
+                    {
+                        var rangeEnd = root.Descendants<MoveToRangeEnd>()
+                            .FirstOrDefault(e => e.Id?.Value == id);
+                        rangeEnd?.Remove();
+                        totalRemoved++;
+                    }
+                    el.Remove();
+                    totalRemoved++;
+                }
+                else
+                {
+                    seenMoveToNames.Add(name);
+                    if (id != null) validMoveToRangeIds.Add(id);
+                }
+            }
+
+            // Now process MoveFromRun - keep only as many as we have unique move names
+            var moveFromRuns = root.Descendants<MoveFromRun>().ToList();
+            var moveFromKept = 0;
+            var maxMoveFrom = seenMoveFromNames.Count; // Keep one per unique name
+            foreach (var mf in moveFromRuns)
+            {
+                if (moveFromKept < maxMoveFrom)
+                {
+                    moveFromKept++;
+                    continue; // Keep this one
+                }
+                // Remove excess MoveFromRun elements
+                mf.Remove();
+                totalRemoved++;
+            }
+
+            // Now process MoveToRun - keep only as many as we have unique move names
+            var moveToRuns = root.Descendants<MoveToRun>().ToList();
+            var moveToKept = 0;
+            var maxMoveTo = seenMoveToNames.Count; // Keep one per unique name
+            foreach (var mt in moveToRuns)
+            {
+                if (moveToKept < maxMoveTo)
+                {
+                    moveToKept++;
+                    continue; // Keep this one
+                }
+                // Remove excess MoveToRun elements
+                mt.Remove();
+                totalRemoved++;
+            }
+
+            if (totalRemoved > 0)
+                root.Save();
+        }
+
+        if (totalRemoved > 0)
+            log?.Invoke($"Removed {totalRemoved} duplicate move operations.");
     }
 
     /// <summary>
@@ -1636,12 +1801,13 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     }
 
     /// <summary>
-    /// Generates an 8-character hex revision save ID
+    /// Generates an 8-character hex revision save ID.
+    /// Word's rsid values follow convention of starting with "00" (range 0x00000001 to 0x00FFFFFF).
     /// </summary>
     private static string GenerateRsid()
     {
         int value;
-        lock (_random) { value = _random.Next(0x00100000, 0x7FFFFFFF); }
+        lock (_random) { value = _random.Next(0x00000001, 0x00FFFFFF); }
         return value.ToString("X8");
     }
 

@@ -328,14 +328,179 @@ foreach (var ins in root.Descendants<Inserted>())
 }
 ```
 
-**Result:** ✅ experiment14 has all UTC dates - awaiting Word verification
+**Result:** ❌ Still showed warning
+
+---
+
+## Attempt 11: XML Declaration Fix (2026-01-16)
+
+**What we tried:**
+- Ensure XML declaration has `encoding="UTF-8"` (uppercase) and `standalone="yes"`
+- Write declaration manually since XmlWriter produces lowercase
+
+**Result:** ❌ Still showed warning (experiment15, experiment16, experiment17)
+
+---
+
+## Attempt 12: Pretty-Print XML (2026-01-16)
+
+**What we tried:**
+- Add indentation to match Word's pretty-printed format
+- Word-fixed document.xml has 2835 lines, ours was 1 line (minified)
+
+**Result:** ❌ Still showed warning (experiment18)
+
+---
+
+## Attempt 13: Use Word-Fixed document.xml (2026-01-16)
+
+**What we tried:**
+- Copy word_fixed/word/document.xml into our generated package
+- Keep all other files from our generation
+
+**Result:** ✅ WORKED! (experiment19)
+
+**Key finding:** The issue is in the CONTENT of document.xml, not formatting or declaration.
+
+---
+
+## Attempt 14: Remove Move Operations Only (2026-01-16)
+
+**Hypothesis:** Word removes all move operations during repair. Our generated file has 33 move elements, word_fixed has 0.
+
+**What we tried:**
+- Used Python to remove all move elements (moveFrom, moveTo, moveFromRangeStart, etc.)
+- No other changes
+
+**Result:** ❌ Still showed warning (experiment20)
+
+**Conclusion:** Removing move operations alone is NOT the fix. There's something else different.
+
+---
+
+## Attempt 15: XML Declaration + Move Deduplication (2026-01-16)
+
+**What we tried:**
+- Combined XML declaration fix (`encoding="UTF-8"` uppercase, `standalone="yes"`)
+- Move operation deduplication (keep one pair per move name)
+
+**Test file:** `diagnosis/TEST_xml_decl_plus_dedup.docx`
+
+**Result:** Pending test in Word
+
+**Observation:** Self-closing tags still had spaces (` />` vs `/>`)
+
+---
+
+## Attempt 16: Self-Closing Tag Format Fix (2026-01-16)
+
+**What we tried:**
+- Remove space before self-closing tag slash (` />` → `/>`)
+- Word writes `<w:jc/>`, but .NET XmlWriter writes `<w:jc />`
+
+**Discovery:** Comparison showed:
+| File | Tags with ` />` | Tags with `/>` |
+|------|----------------|----------------|
+| Our output (before fix) | 726 | 0 |
+| WORKING (word_fixed) | 0 | 743 |
+
+**Code change:**
+```csharp
+// Get the XML content and fix self-closing tags
+var xmlContent = encoding.GetString(tempStream.ToArray());
+xmlContent = xmlContent.Replace(" />", "/>");
+```
+
+**Test file:** `diagnosis/TEST_selfclose_fix.docx`
+
+**Verification (unpacked):**
+- XML declaration: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` ✅
+- Self-closing with space: 0 ✅
+- Self-closing without space: 726 ✅
+- moveFrom: 4, moveFromRangeStart: 2, moveTo: 4, moveToRangeStart: 2 ✅
+
+**Result:** ❌ Still showed warning
+
+**Conclusion:** Self-closing tag format is NOT the cause.
+
+---
+
+## Attempt 17: rsidR Range Fix (2026-01-16)
+
+**What we tried:**
+- Changed rsidR generation range from `0x00100000-0x7FFFFFFF` to `0x00000001-0x00FFFFFF`
+- This makes rsidR values start with "00" like Word's convention
+
+**Test file:** `diagnosis/TEST_rsid_range_fix.docx`
 
 **Verification:**
-```bash
-# All dates in UTC format:
-grep -o 'w:date="[^"]*"' diagnosis/experiment14_unpacked/word/document.xml | sort -u
-# Output: w:date="2026-01-16T19:51:57Z"
-```
+- rsidR now starts with "00": `00911519` ✅
+
+**Result:** ❌ Still showed warning
+
+---
+
+## Attempt 18: Copy WORKING document.xml (2026-01-16)
+
+**What we tried:**
+- Copied WORKING's document.xml into our generated package
+- Same as experiment19
+
+**Test file:** `diagnosis/TEST_with_working_docxml.docx`
+
+**Result:** ✅ WORKS (confirms experiment19 finding)
+
+---
+
+## Attempt 19: Attribute Order Fix - w:p elements (2026-01-16)
+
+**What we tried:**
+- Reordered attributes on `<w:p>` elements from:
+  `w:rsidR` → `w:rsidRDefault` → `w14:paraId` → `w14:textId`
+- To match WORKING order:
+  `w14:paraId` → `w14:textId` → `w:rsidR` → `w:rsidRDefault`
+
+**Test file:** `diagnosis/TEST_attr_order_fix.docx`
+
+**Result:** ❌ Still showed warning
+
+---
+
+## Attempt 20: Attribute Order Fix - Tracked Changes (2026-01-16)
+
+**What we tried:**
+- Also reordered attributes on `<w:del>`, `<w:ins>`, `<w:moveFrom>`, `<w:moveTo>` from:
+  `w:author` → `w:date` → `w:id`
+- To match WORKING order:
+  `w:id` → `w:author` → `w:date`
+
+**Test file:** `diagnosis/TEST_attr_order_fix_v2.docx`
+
+**Result:** ❌ Still showed warning
+
+**Conclusion:** Attribute order is NOT the cause.
+
+---
+
+## Current Status
+
+**Ruled out causes:**
+1. ❌ XML declaration format (uppercase UTF-8, standalone=yes)
+2. ❌ Move operation deduplication
+3. ❌ Self-closing tag format (space before />)
+4. ❌ Date format (timezone vs UTC)
+5. ❌ Paragraph IDs presence (w14:paraId/textId)
+6. ❌ rsidR value range (starting with "00")
+7. ❌ Attribute order on w:p elements
+8. ❌ Attribute order on tracked change elements
+
+**What works:** `TEST_with_working_docxml.docx` - copying Word-repaired document.xml into our package
+
+**Remaining difference:** The actual ID VALUES themselves:
+- WORKING: `w14:paraId="4B9BA395"`, `w:rsidR="006E1EB0"`
+- Ours: `w14:paraId="702AAE95"`, `w:rsidR="00911519"`
+
+**Unknown:** Why the specific ID values matter, or what else differs between the files
 
 ---
 
