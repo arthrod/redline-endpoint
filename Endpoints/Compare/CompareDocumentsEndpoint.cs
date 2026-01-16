@@ -25,6 +25,15 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     private static readonly XNamespace Pt14 = "http://powertools.codeplex.com/2011";
     private static readonly XNamespace Rel = "http://schemas.openxmlformats.org/package/2006/relationships";
     private static readonly XNamespace R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+    private static readonly XNamespace W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+    private static readonly HashSet<string> WordRepairDiffFocusEntries = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "word/document.xml",
+        "word/settings.xml",
+        "word/numbering.xml",
+        "docProps/core.xml",
+        "docProps/app.xml"
+    };
 
     public override void Configure()
     {
@@ -76,6 +85,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
 
             LogValidationResults("Cleaned output", cleanedBytes, Logger);
             LogPackageIntegrity("Cleaned output", cleanedBytes, Logger);
+            TryLogWordRepairDiff(cleanedBytes, Logger);
 
             // Return the redlined document
             await Send.BytesAsync(
@@ -684,6 +694,285 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         }
     }
 
+    private static void TryLogWordRepairDiff(byte[] cleanedBytes, ILogger logger)
+    {
+        var repairedPath = FindWordRepairedPath();
+        if (repairedPath == null)
+        {
+            logger.LogInformation("Word-repaired docx not found. Add fixed_redline_by_word.docx to the project root.");
+            return;
+        }
+
+        try
+        {
+            var repairedBytes = File.ReadAllBytes(repairedPath);
+            logger.LogInformation("Comparing cleaned output to Word-repaired docx: {Path}", repairedPath);
+            LogDocxDiff("Cleaned output vs Word repair", cleanedBytes, repairedBytes, logger);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to compare cleaned output to Word-repaired docx");
+        }
+    }
+
+    private static string? FindWordRepairedPath()
+    {
+        var candidates = new[]
+        {
+            "fixed_redline_by_word.docx",
+            "redline_fixed_by_word.docx",
+            "redlined_repaired.docx",
+            "redlined_fixed_by_word.docx"
+        };
+
+        var searchRoots = new[]
+        {
+            Directory.GetCurrentDirectory(),
+            AppContext.BaseDirectory,
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."))
+        };
+
+        foreach (var root in searchRoots.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            foreach (var candidate in candidates)
+            {
+                var path = Path.Combine(root, candidate);
+                if (File.Exists(path))
+                    return path;
+            }
+        }
+
+        return null;
+    }
+
+    private static void LogDocxDiff(string label, byte[] leftBytes, byte[] rightBytes, ILogger logger)
+    {
+        using var leftStream = new MemoryStream(leftBytes);
+        using var rightStream = new MemoryStream(rightBytes);
+        using var leftArchive = new ZipArchive(leftStream, ZipArchiveMode.Read, true);
+        using var rightArchive = new ZipArchive(rightStream, ZipArchiveMode.Read, true);
+
+        var leftEntries = leftArchive.Entries
+            .Where(entry => !string.IsNullOrEmpty(entry.FullName))
+            .GroupBy(entry => entry.FullName, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+        var rightEntries = rightArchive.Entries
+            .Where(entry => !string.IsNullOrEmpty(entry.FullName))
+            .GroupBy(entry => entry.FullName, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+        var missingInLeft = rightEntries.Keys.Except(leftEntries.Keys, StringComparer.OrdinalIgnoreCase).ToList();
+        var missingInRight = leftEntries.Keys.Except(rightEntries.Keys, StringComparer.OrdinalIgnoreCase).ToList();
+
+        foreach (var entry in missingInLeft.Take(MaxValidationErrorsToLog))
+        {
+            logger.LogWarning("{Label}: Missing in cleaned output: {Entry}", label, entry);
+        }
+
+        foreach (var entry in missingInRight.Take(MaxValidationErrorsToLog))
+        {
+            logger.LogWarning("{Label}: Missing in Word-repaired output: {Entry}", label, entry);
+        }
+
+        var differences = 0;
+        foreach (var entryName in leftEntries.Keys.Intersect(rightEntries.Keys, StringComparer.OrdinalIgnoreCase))
+        {
+            var leftEntry = leftEntries[entryName];
+            var rightEntry = rightEntries[entryName];
+
+            if (IsXmlEntry(entryName))
+            {
+                var leftDoc = TryLoadXml(leftEntry, logger, label);
+                var rightDoc = TryLoadXml(rightEntry, logger, label);
+
+                if (leftDoc != null && rightDoc != null)
+                {
+                    var leftNormalized = NormalizeXmlForDiff(leftDoc);
+                    var rightNormalized = NormalizeXmlForDiff(rightDoc);
+
+                    if (!XNode.DeepEquals(leftNormalized, rightNormalized))
+                    {
+                        differences++;
+                        logger.LogWarning(
+                            "{Label}: XML differs in {Entry} (Cleaned={LeftSize} bytes, Word={RightSize} bytes)",
+                            label,
+                            entryName,
+                            leftEntry.Length,
+                            rightEntry.Length);
+                        if (ShouldLogXmlDelta(entryName))
+                        {
+                            LogXmlDeltaSummary(label, entryName, leftDoc, rightDoc, logger);
+                        }
+                        if (differences >= MaxValidationErrorsToLog)
+                            break;
+                    }
+
+                    continue;
+                }
+            }
+
+            var leftBytesEntry = ReadEntryBytes(leftEntry);
+            var rightBytesEntry = ReadEntryBytes(rightEntry);
+            if (!leftBytesEntry.SequenceEqual(rightBytesEntry))
+            {
+                differences++;
+                logger.LogWarning(
+                    "{Label}: Binary differs in {Entry} (Cleaned={LeftSize} bytes, Word={RightSize} bytes)",
+                    label,
+                    entryName,
+                    leftBytesEntry.Length,
+                    rightBytesEntry.Length);
+                if (differences >= MaxValidationErrorsToLog)
+                    break;
+            }
+        }
+
+        logger.LogInformation(
+            "{Label}: Word repair diff summary. MissingInCleaned={MissingInCleaned}, MissingInWord={MissingInWord}, ContentDifferences={ContentDifferences}",
+            label,
+            missingInLeft.Count,
+            missingInRight.Count,
+            differences);
+    }
+
+    private static bool IsXmlEntry(string entryName)
+    {
+        return entryName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase) ||
+               entryName.EndsWith(".rels", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static XDocument? TryLoadXml(ZipArchiveEntry entry, ILogger logger, string label)
+    {
+        try
+        {
+            using var stream = entry.Open();
+            return XDocument.Load(stream);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "{Label}: Failed to load XML entry {Entry}", label, entry.FullName);
+            return null;
+        }
+    }
+
+    private static byte[] ReadEntryBytes(ZipArchiveEntry entry)
+    {
+        using var stream = entry.Open();
+        using var memory = new MemoryStream();
+        stream.CopyTo(memory);
+        return memory.ToArray();
+    }
+
+    private static XDocument NormalizeXmlForDiff(XDocument document)
+    {
+        if (document.Root == null)
+            return document;
+
+        var normalizedRoot = NormalizeXmlElement(document.Root);
+        return new XDocument(document.Declaration, normalizedRoot);
+    }
+
+    private static XElement NormalizeXmlElement(XElement element)
+    {
+        var attributes = element.Attributes()
+            .OrderBy(attribute => attribute.Name.NamespaceName)
+            .ThenBy(attribute => attribute.Name.LocalName)
+            .Select(attribute => new XAttribute(attribute.Name, attribute.Value));
+
+        var nodes = element.Nodes().Select<XNode, XNode>(node => node switch
+        {
+            XElement child => NormalizeXmlElement(child),
+            XCData cdata => new XCData(cdata.Value),
+            XText text => new XText(text.Value),
+            XComment comment => new XComment(comment.Value),
+            XProcessingInstruction pi => new XProcessingInstruction(pi.Target, pi.Data),
+            _ => new XText(node.ToString())
+        });
+
+        return new XElement(element.Name, attributes, nodes);
+    }
+
+    private static bool ShouldLogXmlDelta(string entryName)
+    {
+        return WordRepairDiffFocusEntries.Contains(entryName);
+    }
+
+    private static void LogXmlDeltaSummary(string label, string entryName, XDocument leftDoc, XDocument rightDoc, ILogger logger)
+    {
+        var leftElementCount = leftDoc.Descendants().Count();
+        var rightElementCount = rightDoc.Descendants().Count();
+        var leftAttributeCount = leftDoc.Descendants().SelectMany(element => element.Attributes()).Count();
+        var rightAttributeCount = rightDoc.Descendants().SelectMany(element => element.Attributes()).Count();
+
+        logger.LogInformation(
+            "{Label}: {Entry} counts. Elements: Cleaned={LeftElements}, Word={RightElements}. Attributes: Cleaned={LeftAttributes}, Word={RightAttributes}",
+            label,
+            entryName,
+            leftElementCount,
+            rightElementCount,
+            leftAttributeCount,
+            rightAttributeCount);
+
+        LogCountDeltas(label, entryName, "Element", BuildNameCounts(leftDoc.Descendants().Select(element => element.Name.ToString())), BuildNameCounts(rightDoc.Descendants().Select(element => element.Name.ToString())), logger);
+        LogCountDeltas(label, entryName, "Attribute", BuildNameCounts(leftDoc.Descendants().SelectMany(element => element.Attributes()).Select(attribute => attribute.Name.ToString())), BuildNameCounts(rightDoc.Descendants().SelectMany(element => element.Attributes()).Select(attribute => attribute.Name.ToString())), logger);
+    }
+
+    private static Dictionary<string, int> BuildNameCounts(IEnumerable<string> names)
+    {
+        var counts = new Dictionary<string, int>(StringComparer.Ordinal);
+        foreach (var name in names)
+        {
+            if (counts.TryGetValue(name, out var existing))
+                counts[name] = existing + 1;
+            else
+                counts[name] = 1;
+        }
+
+        return counts;
+    }
+
+    private static void LogCountDeltas(
+        string label,
+        string entryName,
+        string kind,
+        Dictionary<string, int> leftCounts,
+        Dictionary<string, int> rightCounts,
+        ILogger logger)
+    {
+        var differences = leftCounts.Keys
+            .Union(rightCounts.Keys)
+            .Select(name =>
+            {
+                leftCounts.TryGetValue(name, out var left);
+                rightCounts.TryGetValue(name, out var right);
+                return new
+                {
+                    Name = name,
+                    Left = left,
+                    Right = right,
+                    Delta = right - left
+                };
+            })
+            .Where(item => item.Delta != 0)
+            .OrderByDescending(item => Math.Abs(item.Delta))
+            .Take(MaxValidationErrorsToLog)
+            .ToList();
+
+        foreach (var item in differences)
+        {
+            logger.LogWarning(
+                "{Label}: {Entry} {Kind} delta {Name} (Cleaned={Left}, Word={Right}, Delta={Delta})",
+                label,
+                entryName,
+                kind,
+                item.Name,
+                item.Left,
+                item.Right,
+                item.Delta);
+        }
+    }
+
     private static void LogPackageIntegrity(string label, byte[] docBytes, ILogger logger)
     {
         try
@@ -710,14 +999,19 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 relIssues += LogRelationshipIssues(label, relsDoc, relEntry.FullName, entrySet, logger);
             }
 
+            var relReferenceIssues = LogRelationshipReferenceIssues(label, entries, logger);
+            var noteReferenceIssues = LogNoteReferenceIssues(label, entries, logger);
+
             logger.LogInformation(
-                "{Label}: Package integrity summary. Entries={EntryCount}, Relationships={RelCount}, DuplicateIssues={DuplicateIssues}, ContentTypeIssues={ContentTypeIssues}, RelationshipIssues={RelIssues}",
+                "{Label}: Package integrity summary. Entries={EntryCount}, Relationships={RelCount}, DuplicateIssues={DuplicateIssues}, ContentTypeIssues={ContentTypeIssues}, RelationshipIssues={RelIssues}, RelationshipReferenceIssues={RelReferenceIssues}, NoteReferenceIssues={NoteReferenceIssues}",
                 label,
                 entries.Count,
                 relCount,
                 duplicateIssues,
                 contentTypeIssues,
-                relIssues);
+                relIssues,
+                relReferenceIssues,
+                noteReferenceIssues);
         }
         catch (Exception ex)
         {
@@ -755,6 +1049,167 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 group.Key,
                 variants);
             issues++;
+        }
+
+        return issues;
+    }
+
+    private static int LogRelationshipReferenceIssues(string label, List<ZipArchiveEntry> entries, ILogger logger)
+    {
+        var issues = 0;
+        var relsIdMap = BuildRelationshipIdMap(entries);
+        var relAttributeNames = new HashSet<string>(new[] { "id", "embed", "link" }, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var contentEntry in entries.Where(entry => IsContentPartWithRelationships(entry.FullName)))
+        {
+            using var contentStream = contentEntry.Open();
+            var contentDoc = XDocument.Load(contentStream);
+
+            var relsPath = GetRelsPathForContentPart(contentEntry.FullName);
+            relsIdMap.TryGetValue(relsPath, out var relIds);
+
+            var relAttrs = contentDoc.Descendants()
+                .SelectMany(element => element.Attributes())
+                .Where(attr => attr.Name.Namespace == R && relAttributeNames.Contains(attr.Name.LocalName))
+                .ToList();
+
+            if (relAttrs.Count == 0)
+                continue;
+
+            if (relIds == null)
+            {
+                issues++;
+                logger.LogWarning(
+                    "{Label}: Missing .rels file for {Part} but found relationship references (expected {RelsPath})",
+                    label,
+                    contentEntry.FullName,
+                    relsPath);
+                if (issues >= MaxValidationErrorsToLog)
+                    break;
+                continue;
+            }
+
+            foreach (var attr in relAttrs)
+            {
+                if (!relIds.Contains(attr.Value))
+                {
+                    issues++;
+                    logger.LogWarning(
+                        "{Label}: Missing relationship Id {Id} referenced in {Part} (rels: {RelsPath})",
+                        label,
+                        attr.Value,
+                        contentEntry.FullName,
+                        relsPath);
+                    if (issues >= MaxValidationErrorsToLog)
+                        return issues;
+                }
+            }
+        }
+
+        return issues;
+    }
+
+    private static Dictionary<string, HashSet<string>> BuildRelationshipIdMap(List<ZipArchiveEntry> entries)
+    {
+        var map = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var relEntry in entries.Where(entry => entry.FullName.EndsWith(".rels", StringComparison.OrdinalIgnoreCase)))
+        {
+            using var relStream = relEntry.Open();
+            var relsDoc = XDocument.Load(relStream);
+            var ids = relsDoc.Root?
+                .Elements(Rel + "Relationship")
+                .Select(rel => rel.Attribute("Id")?.Value)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase)
+                ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            map[relEntry.FullName] = ids;
+        }
+
+        return map;
+    }
+
+    private static int LogNoteReferenceIssues(string label, List<ZipArchiveEntry> entries, ILogger logger)
+    {
+        var issues = 0;
+        var footnoteIds = LoadNoteIds(entries, "word/footnotes.xml", W + "footnote");
+        var endnoteIds = LoadNoteIds(entries, "word/endnotes.xml", W + "endnote");
+        var commentIds = LoadNoteIds(entries, "word/comments.xml", W + "comment");
+
+        foreach (var contentEntry in entries.Where(entry => IsContentPartWithRelationships(entry.FullName)))
+        {
+            using var contentStream = contentEntry.Open();
+            var contentDoc = XDocument.Load(contentStream);
+
+            issues += LogMissingNoteReferences(label, contentEntry.FullName, contentDoc, W + "footnoteReference", footnoteIds, logger);
+            if (issues >= MaxValidationErrorsToLog)
+                return issues;
+
+            issues += LogMissingNoteReferences(label, contentEntry.FullName, contentDoc, W + "endnoteReference", endnoteIds, logger);
+            if (issues >= MaxValidationErrorsToLog)
+                return issues;
+
+            issues += LogMissingNoteReferences(label, contentEntry.FullName, contentDoc, W + "commentReference", commentIds, logger);
+            if (issues >= MaxValidationErrorsToLog)
+                return issues;
+
+            issues += LogMissingNoteReferences(label, contentEntry.FullName, contentDoc, W + "commentRangeStart", commentIds, logger);
+            if (issues >= MaxValidationErrorsToLog)
+                return issues;
+
+            issues += LogMissingNoteReferences(label, contentEntry.FullName, contentDoc, W + "commentRangeEnd", commentIds, logger);
+            if (issues >= MaxValidationErrorsToLog)
+                return issues;
+        }
+
+        return issues;
+    }
+
+    private static HashSet<string> LoadNoteIds(List<ZipArchiveEntry> entries, string partName, XName elementName)
+    {
+        var entry = entries.FirstOrDefault(candidate =>
+            string.Equals(candidate.FullName, partName, StringComparison.OrdinalIgnoreCase));
+
+        if (entry == null)
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        using var stream = entry.Open();
+        var doc = XDocument.Load(stream);
+
+        return doc.Descendants(elementName)
+            .Select(element => element.Attribute(W + "id")?.Value)
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static int LogMissingNoteReferences(
+        string label,
+        string partName,
+        XDocument contentDoc,
+        XName referenceElement,
+        HashSet<string> knownIds,
+        ILogger logger)
+    {
+        var issues = 0;
+        var references = contentDoc.Descendants(referenceElement)
+            .Select(element => element.Attribute(W + "id")?.Value)
+            .Where(id => !string.IsNullOrWhiteSpace(id));
+
+        foreach (var id in references)
+        {
+            if (!knownIds.Contains(id!))
+            {
+                issues++;
+                logger.LogWarning(
+                    "{Label}: Missing {ReferenceType} id {Id} referenced in {Part}",
+                    label,
+                    referenceElement.LocalName,
+                    id,
+                    partName);
+                if (issues >= MaxValidationErrorsToLog)
+                    return issues;
+            }
         }
 
         return issues;
