@@ -1,6 +1,8 @@
 using FastEndpoints;
 using Docxodus;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using System.IO.Compression;
 using System.Xml.Linq;
 
@@ -116,6 +118,8 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
 
                 foreach (var footerPart in doc.MainDocumentPart.FooterParts)
                     CleanXmlPart(footerPart);
+
+                FixNotesParts(doc);
             }
         }
 
@@ -160,10 +164,15 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             var mcIgnorable = root.Attribute(XName.Get("Ignorable", "http://schemas.openxmlformats.org/markup-compatibility/2006"));
             if (mcIgnorable != null)
             {
-                var values = mcIgnorable.Value.Split(' ')
+                var values = mcIgnorable.Value
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
                     .Where(v => v != "pt14")
                     .ToArray();
-                mcIgnorable.Value = string.Join(" ", values);
+
+                if (values.Length == 0)
+                    mcIgnorable.Remove();
+                else
+                    mcIgnorable.Value = string.Join(" ", values);
             }
         }
 
@@ -257,6 +266,148 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         return outputStream.ToArray();
     }
 
+    private static void FixNotesParts(WordprocessingDocument doc)
+    {
+        if (doc.MainDocumentPart == null)
+            return;
+
+        var mainPart = doc.MainDocumentPart;
+        var hasFootnoteRefs = HasFootnoteReferences(mainPart);
+        var hasEndnoteRefs = HasEndnoteReferences(mainPart);
+
+        if (!hasFootnoteRefs && mainPart.FootnotesPart != null)
+            mainPart.DeletePart(mainPart.FootnotesPart);
+        else if (mainPart.FootnotesPart != null)
+            EnsureFootnotesHaveSeparators(mainPart.FootnotesPart);
+
+        if (!hasEndnoteRefs && mainPart.EndnotesPart != null)
+            mainPart.DeletePart(mainPart.EndnotesPart);
+        else if (mainPart.EndnotesPart != null)
+            EnsureEndnotesHaveSeparators(mainPart.EndnotesPart);
+    }
+
+    private static bool HasFootnoteReferences(MainDocumentPart mainPart)
+    {
+        if (mainPart.Document?.Descendants<FootnoteReference>().Any() == true)
+            return true;
+
+        foreach (var headerPart in mainPart.HeaderParts)
+        {
+            if (headerPart.Header?.Descendants<FootnoteReference>().Any() == true)
+                return true;
+        }
+
+        foreach (var footerPart in mainPart.FooterParts)
+        {
+            if (footerPart.Footer?.Descendants<FootnoteReference>().Any() == true)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool HasEndnoteReferences(MainDocumentPart mainPart)
+    {
+        if (mainPart.Document?.Descendants<EndnoteReference>().Any() == true)
+            return true;
+
+        foreach (var headerPart in mainPart.HeaderParts)
+        {
+            if (headerPart.Header?.Descendants<EndnoteReference>().Any() == true)
+                return true;
+        }
+
+        foreach (var footerPart in mainPart.FooterParts)
+        {
+            if (footerPart.Footer?.Descendants<EndnoteReference>().Any() == true)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static void EnsureFootnotesHaveSeparators(FootnotesPart footnotesPart)
+    {
+        var footnotes = footnotesPart.Footnotes ?? new Footnotes();
+
+        if (footnotesPart.Footnotes == null)
+            footnotesPart.Footnotes = footnotes;
+
+        var separator = footnotes.Elements<Footnote>()
+            .FirstOrDefault(f => f.Type?.Value == FootnoteEndnoteValues.Separator);
+        if (separator == null)
+        {
+            separator = CreateFootnoteSeparator(-1, FootnoteEndnoteValues.Separator);
+            footnotes.InsertAt(separator, 0);
+        }
+
+        var continuation = footnotes.Elements<Footnote>()
+            .FirstOrDefault(f => f.Type?.Value == FootnoteEndnoteValues.ContinuationSeparator);
+        if (continuation == null)
+        {
+            var continuationSeparator = CreateFootnoteSeparator(0, FootnoteEndnoteValues.ContinuationSeparator);
+            footnotes.InsertAfter(continuationSeparator, separator);
+        }
+
+        footnotes.Save();
+    }
+
+    private static void EnsureEndnotesHaveSeparators(EndnotesPart endnotesPart)
+    {
+        var endnotes = endnotesPart.Endnotes ?? new Endnotes();
+
+        if (endnotesPart.Endnotes == null)
+            endnotesPart.Endnotes = endnotes;
+
+        var separator = endnotes.Elements<Endnote>()
+            .FirstOrDefault(f => f.Type?.Value == FootnoteEndnoteValues.Separator);
+        if (separator == null)
+        {
+            separator = CreateEndnoteSeparator(-1, FootnoteEndnoteValues.Separator);
+            endnotes.InsertAt(separator, 0);
+        }
+
+        var continuation = endnotes.Elements<Endnote>()
+            .FirstOrDefault(f => f.Type?.Value == FootnoteEndnoteValues.ContinuationSeparator);
+        if (continuation == null)
+        {
+            var continuationSeparator = CreateEndnoteSeparator(0, FootnoteEndnoteValues.ContinuationSeparator);
+            endnotes.InsertAfter(continuationSeparator, separator);
+        }
+
+        endnotes.Save();
+    }
+
+    private static Footnote CreateFootnoteSeparator(int id, FootnoteEndnoteValues type)
+    {
+        var run = new Run();
+        if (type == FootnoteEndnoteValues.Separator)
+            run.Append(new SeparatorMark());
+        else
+            run.Append(new ContinuationSeparatorMark());
+
+        return new Footnote(new Paragraph(run))
+        {
+            Id = id,
+            Type = type
+        };
+    }
+
+    private static Endnote CreateEndnoteSeparator(int id, FootnoteEndnoteValues type)
+    {
+        var run = new Run();
+        if (type == FootnoteEndnoteValues.Separator)
+            run.Append(new SeparatorMark());
+        else
+            run.Append(new ContinuationSeparatorMark());
+
+        return new Endnote(new Paragraph(run))
+        {
+            Id = id,
+            Type = type
+        };
+    }
+
     /// <summary>
     /// Builds a mapping of old IDs to new IDs for GUID-style relationship IDs
     /// </summary>
@@ -328,12 +479,46 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 idAttr.Value = newId;
             }
 
-            // Fix absolute paths - convert to relative paths based on .rels location
-            if (targetAttr != null && targetAttr.Value.StartsWith("/"))
+            // Fix paths - convert absolute and redundant relative paths
+            if (targetAttr != null)
             {
-                targetAttr.Value = NormalizeTargetPath(targetAttr.Value, baseFolder);
+                var target = targetAttr.Value;
+
+                // Fix absolute paths (e.g., /word/footnotes.xml)
+                if (target.StartsWith("/"))
+                {
+                    targetAttr.Value = NormalizeTargetPath(target, baseFolder);
+                }
+                // Fix redundant relative paths (e.g., ../word/footnotes.xml when in word/)
+                else if (target.StartsWith("../") && !string.IsNullOrEmpty(baseFolder))
+                {
+                    targetAttr.Value = SimplifyRelativePath(target, baseFolder);
+                }
             }
         }
+    }
+
+    /// <summary>
+    /// Simplifies redundant relative paths like "../word/footnotes.xml" to "footnotes.xml"
+    /// when the owning part is already in the target folder
+    /// </summary>
+    private static string SimplifyRelativePath(string relativePath, string baseFolder)
+    {
+        // baseFolder is like "word/" - the folder containing the owning part
+        // relativePath is like "../word/footnotes.xml"
+
+        // If path goes up one level and back into the base folder, simplify it
+        // e.g., "../word/footnotes.xml" when baseFolder is "word/" -> "footnotes.xml"
+        var baseFolderName = baseFolder.TrimEnd('/');
+        var expectedPrefix = "../" + baseFolderName + "/";
+
+        if (relativePath.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return relativePath[expectedPrefix.Length..];
+        }
+
+        // Keep the path as-is if it doesn't match the pattern
+        return relativePath;
     }
 
     /// <summary>
@@ -353,7 +538,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             return "";
 
         if (relsFolder.EndsWith("/_rels"))
-            return relsFolder[..^5]; // Remove "/_rels", keep trailing context
+            return relsFolder[..^5] + "/"; // Remove "_rels", keep the folder with trailing slash
 
         return "";
     }

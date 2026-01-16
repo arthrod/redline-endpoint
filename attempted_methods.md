@@ -80,7 +80,7 @@ private static byte[] FixRelationshipsWithZip(byte[] docBytes)
 }
 ```
 
-**Result:** ⏳ Testing in progress
+**Result:** ❌ Still showed warning
 
 **Issues found in relationships:**
 ```xml
@@ -90,6 +90,52 @@ private static byte[] FixRelationshipsWithZip(byte[] docBytes)
 <!-- After (fixed) -->
 <Relationship Id="rId8" Target="footnotes.xml" ... />
 ```
+
+---
+
+## Attempt 4: ID Mapping + Context-Aware Path Normalization
+
+**What we tried:**
+- Two-pass approach with proper ID mapping:
+  1. First pass: Read all .rels files, build `oldId → newId` mapping
+  2. Second pass: Apply mappings to both .rels files AND content parts (document.xml, headers, footers)
+- Update `r:id`, `r:embed`, `r:link` attributes in content parts to match renamed IDs
+- Context-aware path normalization based on .rels file location:
+  - `_rels/.rels`: `/word/document.xml` → `word/document.xml` (relative to root)
+  - `word/_rels/document.xml.rels`: `/word/footnotes.xml` → `footnotes.xml` (relative to word/)
+
+**Code:**
+```csharp
+// Build mapping before making changes
+private static Dictionary<string, string> BuildIdMapping(XDocument relsDoc) { ... }
+
+// Update references in content parts
+private static void UpdateRelationshipReferences(XDocument contentDoc, Dictionary<string, string> idMapping)
+{
+    var relAttributeNames = new[] { "id", "embed", "link" };
+    foreach (var element in contentDoc.Descendants())
+    {
+        foreach (var attrName in relAttributeNames)
+        {
+            var attr = element.Attribute(R + attrName);
+            if (attr != null && idMapping.TryGetValue(attr.Value, out var newId))
+                attr.Value = newId;
+        }
+    }
+}
+
+// Context-aware path normalization
+private static string NormalizeTargetPath(string absolutePath, string baseFolder) { ... }
+```
+
+**Result:** ❌ Still showed warning
+
+**Observations from generated file:**
+- Root `.rels` correct: `Target="word/document.xml"`
+- Word `.rels` has redundant paths: `Target="../word/footnotes.xml"` (works but unusual)
+- These redundant paths may come from Docxodus as relative paths (not absolute), so our fix didn't touch them
+
+**Why it didn't work:** The relationship paths are technically valid. The issue may be elsewhere (Content_Types, corrupt XML structure, or something else in Docxodus output).
 
 ---
 
