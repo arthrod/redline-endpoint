@@ -18,6 +18,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     // PowerTools namespace that causes Word warnings
     private static readonly XNamespace Pt14 = "http://powertools.codeplex.com/2011";
     private static readonly XNamespace Rel = "http://schemas.openxmlformats.org/package/2006/relationships";
+    private static readonly XNamespace R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
 
     public override void Configure()
     {
@@ -172,34 +173,83 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     }
 
     /// <summary>
-    /// Fixes relationship issues using ZipArchive: converts GUID-style IDs to rIdN format
-    /// and absolute paths to relative paths
+    /// Fixes relationship issues using ZipArchive: converts GUID-style IDs to rIdN format,
+    /// absolute paths to relative paths, and updates all r:* references in content parts
     /// </summary>
     private static byte[] FixRelationshipsWithZip(byte[] docBytes)
     {
         using var inputStream = new MemoryStream(docBytes);
         using var outputStream = new MemoryStream();
 
+        // First pass: read all entries and build ID mappings from .rels files
+        // Key: .rels file path, Value: dictionary of oldId -> newId
+        var idMappings = new Dictionary<string, Dictionary<string, string>>();
+        var entryContents = new Dictionary<string, byte[]>();
+
         using (var archive = new ZipArchive(inputStream, ZipArchiveMode.Read))
-        using (var outputArchive = new ZipArchive(outputStream, ZipArchiveMode.Create, true))
         {
             foreach (var entry in archive.Entries)
             {
-                var newEntry = outputArchive.CreateEntry(entry.FullName, CompressionLevel.Optimal);
-
                 using var entryStream = entry.Open();
-                using var newEntryStream = newEntry.Open();
+                using var memStream = new MemoryStream();
+                entryStream.CopyTo(memStream);
+                entryContents[entry.FullName] = memStream.ToArray();
 
-                // Fix relationship files
+                // Build mappings for .rels files
                 if (entry.FullName.EndsWith(".rels"))
                 {
-                    var xdoc = XDocument.Load(entryStream);
-                    FixRelationshipsXml(xdoc);
+                    memStream.Position = 0;
+                    var xdoc = XDocument.Load(memStream);
+                    var mapping = BuildIdMapping(xdoc);
+                    if (mapping.Count > 0)
+                    {
+                        idMappings[entry.FullName] = mapping;
+                    }
+                }
+            }
+        }
+
+        // Second pass: write all entries, applying fixes
+        using (var outputArchive = new ZipArchive(outputStream, ZipArchiveMode.Create, true))
+        {
+            foreach (var kvp in entryContents)
+            {
+                var entryPath = kvp.Key;
+                var content = kvp.Value;
+
+                var newEntry = outputArchive.CreateEntry(entryPath, CompressionLevel.Optimal);
+                using var newEntryStream = newEntry.Open();
+
+                if (entryPath.EndsWith(".rels"))
+                {
+                    // Fix .rels file (rename IDs and fix paths)
+                    using var contentStream = new MemoryStream(content);
+                    var xdoc = XDocument.Load(contentStream);
+                    FixRelationshipsXml(xdoc, entryPath, idMappings.GetValueOrDefault(entryPath));
                     xdoc.Save(newEntryStream);
+                }
+                else if (IsContentPartWithRelationships(entryPath))
+                {
+                    // Find the corresponding .rels file for this content part
+                    var relsPath = GetRelsPathForContentPart(entryPath);
+                    var mapping = idMappings.GetValueOrDefault(relsPath);
+
+                    if (mapping != null && mapping.Count > 0)
+                    {
+                        // Update r:* references in the content part
+                        using var contentStream = new MemoryStream(content);
+                        var xdoc = XDocument.Load(contentStream);
+                        UpdateRelationshipReferences(xdoc, mapping);
+                        xdoc.Save(newEntryStream);
+                    }
+                    else
+                    {
+                        newEntryStream.Write(content, 0, content.Length);
+                    }
                 }
                 else
                 {
-                    entryStream.CopyTo(newEntryStream);
+                    newEntryStream.Write(content, 0, content.Length);
                 }
             }
         }
@@ -208,12 +258,14 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     }
 
     /// <summary>
-    /// Fixes the relationships XML document
+    /// Builds a mapping of old IDs to new IDs for GUID-style relationship IDs
     /// </summary>
-    private static void FixRelationshipsXml(XDocument relsDoc)
+    private static Dictionary<string, string> BuildIdMapping(XDocument relsDoc)
     {
+        var mapping = new Dictionary<string, string>();
+
         if (relsDoc.Root == null)
-            return;
+            return mapping;
 
         var relationships = relsDoc.Root.Elements(Rel + "Relationship").ToList();
         int nextId = 1;
@@ -229,6 +281,40 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             }
         }
 
+        // Build mapping for GUID-style IDs
+        foreach (var rel in relationships)
+        {
+            var idAttr = rel.Attribute("Id");
+            if (idAttr == null) continue;
+
+            if (!idAttr.Value.StartsWith("rId"))
+            {
+                var oldId = idAttr.Value;
+                var newId = $"rId{nextId++}";
+                mapping[oldId] = newId;
+            }
+        }
+
+        return mapping;
+    }
+
+    /// <summary>
+    /// Fixes the relationships XML document using the pre-built mapping
+    /// </summary>
+    /// <param name="relsDoc">The relationships XML document</param>
+    /// <param name="relsPath">The path of the .rels file (e.g., "_rels/.rels" or "word/_rels/document.xml.rels")</param>
+    /// <param name="idMapping">Mapping of old relationship IDs to new IDs</param>
+    private static void FixRelationshipsXml(XDocument relsDoc, string relsPath, Dictionary<string, string>? idMapping)
+    {
+        if (relsDoc.Root == null)
+            return;
+
+        // Compute the base folder for this .rels file
+        // e.g., "_rels/.rels" -> "" (root), "word/_rels/document.xml.rels" -> "word/"
+        var baseFolder = GetBaseFolderForRelsFile(relsPath);
+
+        var relationships = relsDoc.Root.Elements(Rel + "Relationship").ToList();
+
         foreach (var rel in relationships)
         {
             var idAttr = rel.Attribute("Id");
@@ -236,17 +322,108 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
 
             if (idAttr == null) continue;
 
-            // Fix GUID-style IDs (like R76e2e2db410345d5)
-            if (!idAttr.Value.StartsWith("rId"))
+            // Apply ID mapping if exists
+            if (idMapping != null && idMapping.TryGetValue(idAttr.Value, out var newId))
             {
-                idAttr.Value = $"rId{nextId++}";
+                idAttr.Value = newId;
             }
 
-            // Fix absolute paths (like /word/footnotes.xml -> footnotes.xml)
-            if (targetAttr != null && targetAttr.Value.StartsWith("/word/"))
+            // Fix absolute paths - convert to relative paths based on .rels location
+            if (targetAttr != null && targetAttr.Value.StartsWith("/"))
             {
-                targetAttr.Value = targetAttr.Value[6..]; // Remove "/word/"
+                targetAttr.Value = NormalizeTargetPath(targetAttr.Value, baseFolder);
             }
         }
+    }
+
+    /// <summary>
+    /// Gets the base folder for a .rels file (the folder containing the parts it references)
+    /// </summary>
+    /// <param name="relsPath">Path like "_rels/.rels" or "word/_rels/document.xml.rels"</param>
+    /// <returns>Base folder like "" or "word/"</returns>
+    private static string GetBaseFolderForRelsFile(string relsPath)
+    {
+        // Remove the filename to get the _rels folder path
+        var relsFolder = Path.GetDirectoryName(relsPath)?.Replace('\\', '/') ?? "";
+
+        // The base folder is the parent of the _rels folder
+        // "_rels" -> "" (root)
+        // "word/_rels" -> "word/"
+        if (relsFolder == "_rels")
+            return "";
+
+        if (relsFolder.EndsWith("/_rels"))
+            return relsFolder[..^5]; // Remove "/_rels", keep trailing context
+
+        return "";
+    }
+
+    /// <summary>
+    /// Normalizes an absolute target path to be relative to the base folder
+    /// </summary>
+    /// <param name="absolutePath">Absolute path like "/word/footnotes.xml"</param>
+    /// <param name="baseFolder">Base folder like "" or "word/"</param>
+    /// <returns>Relative path appropriate for the .rels location</returns>
+    private static string NormalizeTargetPath(string absolutePath, string baseFolder)
+    {
+        // Remove leading slash to get the path from package root
+        var pathFromRoot = absolutePath.TrimStart('/');
+
+        // If baseFolder is empty (root-level .rels), the target is relative to root
+        if (string.IsNullOrEmpty(baseFolder))
+            return pathFromRoot;
+
+        // If the path starts with the base folder, make it relative to that folder
+        // e.g., baseFolder="word/", path="word/footnotes.xml" -> "footnotes.xml"
+        if (pathFromRoot.StartsWith(baseFolder, StringComparison.OrdinalIgnoreCase))
+            return pathFromRoot[baseFolder.Length..];
+
+        // Path is outside the base folder, need to use ../ to navigate up
+        // e.g., baseFolder="word/", path="customXml/item1.xml" -> "../customXml/item1.xml"
+        return "../" + pathFromRoot;
+    }
+
+    /// <summary>
+    /// Updates relationship references (r:id, r:embed, r:link, etc.) in a content part
+    /// </summary>
+    private static void UpdateRelationshipReferences(XDocument contentDoc, Dictionary<string, string> idMapping)
+    {
+        // Attributes that reference relationship IDs
+        var relAttributeNames = new[] { "id", "embed", "link" };
+
+        foreach (var element in contentDoc.Descendants())
+        {
+            foreach (var attrName in relAttributeNames)
+            {
+                var attr = element.Attribute(R + attrName);
+                if (attr != null && idMapping.TryGetValue(attr.Value, out var newId))
+                {
+                    attr.Value = newId;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Determines if a zip entry path is a content part that may contain relationship references
+    /// </summary>
+    private static bool IsContentPartWithRelationships(string entryPath)
+    {
+        return entryPath.StartsWith("word/") &&
+               entryPath.EndsWith(".xml") &&
+               !entryPath.Contains("/_rels/");
+    }
+
+    /// <summary>
+    /// Gets the .rels file path for a given content part
+    /// </summary>
+    private static string GetRelsPathForContentPart(string contentPartPath)
+    {
+        // e.g., "word/document.xml" -> "word/_rels/document.xml.rels"
+        var directory = Path.GetDirectoryName(contentPartPath)?.Replace('\\', '/') ?? "";
+        var fileName = Path.GetFileName(contentPartPath);
+        return string.IsNullOrEmpty(directory)
+            ? $"_rels/{fileName}.rels"
+            : $"{directory}/_rels/{fileName}.rels";
     }
 }
