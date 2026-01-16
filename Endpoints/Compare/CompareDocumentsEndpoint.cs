@@ -2,7 +2,9 @@ using FastEndpoints;
 using Docxodus;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Validation;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.Extensions.Logging;
 using System.IO.Compression;
 using System.Xml.Linq;
 
@@ -17,6 +19,8 @@ public class CompareRequest
 
 public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
 {
+    private const int MaxValidationErrorsToLog = 50;
+
     // PowerTools namespace that causes Word warnings
     private static readonly XNamespace Pt14 = "http://powertools.codeplex.com/2011";
     private static readonly XNamespace Rel = "http://schemas.openxmlformats.org/package/2006/relationships";
@@ -63,8 +67,13 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             // Perform comparison
             var result = WmlComparer.Compare(originalDoc, modifiedDoc, settings);
 
+            LogValidationResults("Docxodus raw output", result.DocumentByteArray, Logger);
+            TryLogSourceOfTruth(Logger);
+
             // Clean the output to remove PowerTools internal attributes and fix relationships
-            var cleanedBytes = CleanDocument(result.DocumentByteArray);
+            var cleanedBytes = CleanDocument(result.DocumentByteArray, message => Logger.LogInformation(message));
+
+            LogValidationResults("Cleaned output", cleanedBytes, Logger);
 
             // Return the redlined document
             await Send.BytesAsync(
@@ -85,7 +94,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     /// <summary>
     /// Cleans the document to remove PowerTools internal attributes and fix relationship issues
     /// </summary>
-    private static byte[] CleanDocument(byte[] docBytes)
+    private static byte[] CleanDocument(byte[] docBytes, Action<string>? log = null)
     {
         using var stream = new MemoryStream();
         stream.Write(docBytes, 0, docBytes.Length);
@@ -119,7 +128,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 foreach (var footerPart in doc.MainDocumentPart.FooterParts)
                     CleanXmlPart(footerPart);
 
-                FixNotesParts(doc);
+                FixNotesParts(doc, log);
             }
         }
 
@@ -266,67 +275,75 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         return outputStream.ToArray();
     }
 
-    private static void FixNotesParts(WordprocessingDocument doc)
+    private static void FixNotesParts(WordprocessingDocument doc, Action<string>? log)
     {
         if (doc.MainDocumentPart == null)
             return;
 
         var mainPart = doc.MainDocumentPart;
-        var hasFootnoteRefs = HasFootnoteReferences(mainPart);
-        var hasEndnoteRefs = HasEndnoteReferences(mainPart);
+        var footnoteRefCount = CountFootnoteReferences(mainPart);
+        var endnoteRefCount = CountEndnoteReferences(mainPart);
+        var hasFootnoteRefs = footnoteRefCount > 0;
+        var hasEndnoteRefs = endnoteRefCount > 0;
+
+        log?.Invoke($"Footnote references: {footnoteRefCount}. Endnote references: {endnoteRefCount}.");
 
         if (!hasFootnoteRefs && mainPart.FootnotesPart != null)
+        {
+            log?.Invoke("Removing footnotes part (no references found).");
             mainPart.DeletePart(mainPart.FootnotesPart);
+        }
         else if (mainPart.FootnotesPart != null)
-            EnsureFootnotesHaveSeparators(mainPart.FootnotesPart);
+        {
+            EnsureFootnotesHaveSeparators(mainPart.FootnotesPart, log);
+        }
 
         if (!hasEndnoteRefs && mainPart.EndnotesPart != null)
+        {
+            log?.Invoke("Removing endnotes part (no references found).");
             mainPart.DeletePart(mainPart.EndnotesPart);
+        }
         else if (mainPart.EndnotesPart != null)
-            EnsureEndnotesHaveSeparators(mainPart.EndnotesPart);
+        {
+            EnsureEndnotesHaveSeparators(mainPart.EndnotesPart, log);
+        }
     }
 
-    private static bool HasFootnoteReferences(MainDocumentPart mainPart)
+    private static int CountFootnoteReferences(MainDocumentPart mainPart)
     {
-        if (mainPart.Document?.Descendants<FootnoteReference>().Any() == true)
-            return true;
+        var count = mainPart.Document?.Descendants<FootnoteReference>().Count() ?? 0;
 
         foreach (var headerPart in mainPart.HeaderParts)
         {
-            if (headerPart.Header?.Descendants<FootnoteReference>().Any() == true)
-                return true;
+            count += headerPart.Header?.Descendants<FootnoteReference>().Count() ?? 0;
         }
 
         foreach (var footerPart in mainPart.FooterParts)
         {
-            if (footerPart.Footer?.Descendants<FootnoteReference>().Any() == true)
-                return true;
+            count += footerPart.Footer?.Descendants<FootnoteReference>().Count() ?? 0;
         }
 
-        return false;
+        return count;
     }
 
-    private static bool HasEndnoteReferences(MainDocumentPart mainPart)
+    private static int CountEndnoteReferences(MainDocumentPart mainPart)
     {
-        if (mainPart.Document?.Descendants<EndnoteReference>().Any() == true)
-            return true;
+        var count = mainPart.Document?.Descendants<EndnoteReference>().Count() ?? 0;
 
         foreach (var headerPart in mainPart.HeaderParts)
         {
-            if (headerPart.Header?.Descendants<EndnoteReference>().Any() == true)
-                return true;
+            count += headerPart.Header?.Descendants<EndnoteReference>().Count() ?? 0;
         }
 
         foreach (var footerPart in mainPart.FooterParts)
         {
-            if (footerPart.Footer?.Descendants<EndnoteReference>().Any() == true)
-                return true;
+            count += footerPart.Footer?.Descendants<EndnoteReference>().Count() ?? 0;
         }
 
-        return false;
+        return count;
     }
 
-    private static void EnsureFootnotesHaveSeparators(FootnotesPart footnotesPart)
+    private static void EnsureFootnotesHaveSeparators(FootnotesPart footnotesPart, Action<string>? log)
     {
         var footnotes = footnotesPart.Footnotes ?? new Footnotes();
 
@@ -339,6 +356,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         {
             separator = CreateFootnoteSeparator(-1, FootnoteEndnoteValues.Separator);
             footnotes.InsertAt(separator, 0);
+            log?.Invoke("Added footnote separator (-1).");
         }
 
         var continuation = footnotes.Elements<Footnote>()
@@ -347,12 +365,13 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         {
             var continuationSeparator = CreateFootnoteSeparator(0, FootnoteEndnoteValues.ContinuationSeparator);
             footnotes.InsertAfter(continuationSeparator, separator);
+            log?.Invoke("Added footnote continuation separator (0).");
         }
 
         footnotes.Save();
     }
 
-    private static void EnsureEndnotesHaveSeparators(EndnotesPart endnotesPart)
+    private static void EnsureEndnotesHaveSeparators(EndnotesPart endnotesPart, Action<string>? log)
     {
         var endnotes = endnotesPart.Endnotes ?? new Endnotes();
 
@@ -365,6 +384,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         {
             separator = CreateEndnoteSeparator(-1, FootnoteEndnoteValues.Separator);
             endnotes.InsertAt(separator, 0);
+            log?.Invoke("Added endnote separator (-1).");
         }
 
         var continuation = endnotes.Elements<Endnote>()
@@ -373,6 +393,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         {
             var continuationSeparator = CreateEndnoteSeparator(0, FootnoteEndnoteValues.ContinuationSeparator);
             endnotes.InsertAfter(continuationSeparator, separator);
+            log?.Invoke("Added endnote continuation separator (0).");
         }
 
         endnotes.Save();
@@ -538,7 +559,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             return "";
 
         if (relsFolder.EndsWith("/_rels"))
-            return relsFolder[..^5] + "/"; // Remove "_rels", keep the folder with trailing slash
+            return relsFolder[..^6] + "/"; // Remove "/_rels" (6 chars), add trailing slash
 
         return "";
     }
