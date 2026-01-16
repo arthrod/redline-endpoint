@@ -99,17 +99,16 @@ def analyze_rels(content, filename):
         # Check for issues
         rel_issues = []
 
-        # Issue 1: Non-standard ID format (should be rId followed by number)
-        if not re.match(r'^rId\d+$', rel_id):
-            rel_issues.append(f"Non-standard ID format")
-
-        # Issue 2: Absolute paths (should be relative for internal targets)
-        if target.startswith('/') and 'http' not in target:
-            rel_issues.append(f"Absolute path (should be relative)")
-
-        # Issue 3: GUID-style IDs
+        # Issue 1: GUID-style IDs
         if re.match(r'^R[0-9a-fA-F]{16,}$', rel_id):
             rel_issues.append(f"GUID-style ID")
+        # Issue 2: Other non-standard ID formats (should be rId followed by number)
+        elif not re.match(r'^rId\d+$', rel_id):
+            rel_issues.append(f"Non-standard ID format")
+
+        # Issue 3: Absolute paths (should be relative for internal targets)
+        if target.startswith('/') and 'http' not in target:
+            rel_issues.append(f"Absolute path (should be relative)")
 
         status = "⚠️ " if rel_issues else "✓ "
         print(f"  {status} {rel_id} -> {target[:40]} ({type_name})")
