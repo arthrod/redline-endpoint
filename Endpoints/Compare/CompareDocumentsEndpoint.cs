@@ -1449,8 +1449,89 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     private static void FixWordInvariants(WordprocessingDocument doc, string author, Action<string>? log)
     {
         EnsureParagraphIds(doc, log);
+        NormalizeTrackedChangeDates(doc, log);
         EnsureTableCellsHaveAtLeastOneParagraph(doc, log);
         EnsureCommentPartsExistIfReferenced(doc, author, log);
+    }
+
+    /// <summary>
+    /// Normalizes tracked change dates to UTC format without microseconds.
+    /// Word requires dates in format: 2026-01-16T19:34:34Z (not timezone offset or microseconds)
+    /// </summary>
+    private static void NormalizeTrackedChangeDates(WordprocessingDocument doc, Action<string>? log)
+    {
+        var main = doc.MainDocumentPart;
+        if (main == null) return;
+
+        var totalFixed = 0;
+
+        foreach (var root in EnumerateStoryRoots(main))
+        {
+            var fixedCount = 0;
+
+            // Fix dates on all tracked change elements
+            foreach (var del in root.Descendants<DeletedRun>())
+            {
+                if (del.Date?.HasValue == true)
+                {
+                    del.Date = NormalizeDateToUtc(del.Date.Value);
+                    fixedCount++;
+                }
+            }
+
+            foreach (var ins in root.Descendants<InsertedRun>())
+            {
+                if (ins.Date?.HasValue == true)
+                {
+                    ins.Date = NormalizeDateToUtc(ins.Date.Value);
+                    fixedCount++;
+                }
+            }
+
+            foreach (var del in root.Descendants<Deleted>())
+            {
+                if (del.Date?.HasValue == true)
+                {
+                    del.Date = NormalizeDateToUtc(del.Date.Value);
+                    fixedCount++;
+                }
+            }
+
+            foreach (var moveFrom in root.Descendants<MoveFromRun>())
+            {
+                if (moveFrom.Date?.HasValue == true)
+                {
+                    moveFrom.Date = NormalizeDateToUtc(moveFrom.Date.Value);
+                    fixedCount++;
+                }
+            }
+
+            foreach (var moveTo in root.Descendants<MoveToRun>())
+            {
+                if (moveTo.Date?.HasValue == true)
+                {
+                    moveTo.Date = NormalizeDateToUtc(moveTo.Date.Value);
+                    fixedCount++;
+                }
+            }
+
+            if (fixedCount > 0)
+                root.Save();
+
+            totalFixed += fixedCount;
+        }
+
+        if (totalFixed > 0)
+            log?.Invoke($"Normalized {totalFixed} tracked change dates to UTC format.");
+    }
+
+    /// <summary>
+    /// Converts a DateTime to UTC and truncates to seconds (removes microseconds)
+    /// </summary>
+    private static DateTime NormalizeDateToUtc(DateTime date)
+    {
+        var utc = date.Kind == DateTimeKind.Utc ? date : date.ToUniversalTime();
+        return new DateTime(utc.Year, utc.Month, utc.Day, utc.Hour, utc.Minute, utc.Second, DateTimeKind.Utc);
     }
 
     /// <summary>
