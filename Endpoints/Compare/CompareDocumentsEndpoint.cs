@@ -81,7 +81,8 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             TryLogSourceOfTruth(Logger);
 
             // Clean the output to remove PowerTools internal attributes and fix relationships
-            var cleanedBytes = CleanDocument(result.DocumentByteArray, message => Logger.LogInformation(message));
+            var author = req.Author ?? "Redline API";
+            var cleanedBytes = CleanDocument(result.DocumentByteArray, author, message => Logger.LogInformation(message));
 
             LogValidationResults("Cleaned output", cleanedBytes, Logger);
             LogPackageIntegrity("Cleaned output", cleanedBytes, Logger);
@@ -106,7 +107,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     /// <summary>
     /// Cleans the document to remove PowerTools internal attributes and fix relationship issues
     /// </summary>
-    private static byte[] CleanDocument(byte[] docBytes, Action<string>? log = null)
+    private static byte[] CleanDocument(byte[] docBytes, string author, Action<string>? log = null)
     {
         using var stream = new MemoryStream();
         stream.Write(docBytes, 0, docBytes.Length);
@@ -141,6 +142,9 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                     CleanXmlPart(footerPart);
 
                 FixNotesParts(doc, log);
+
+                // Word invariants pass - ensure semantic consistency
+                FixWordInvariants(doc, author, log);
             }
         }
 
@@ -195,6 +199,18 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 else
                     mcIgnorable.Value = string.Join(" ", values);
             }
+        }
+
+        // Fix common schema URI bug for images:
+        // Word expects "http://schemas.openxmlformats.org/drawingml/2006/picture"
+        // (NOT https) in a:graphicData/@uri
+        foreach (var gd in xdoc.Descendants().Where(e => e.Name.LocalName == "graphicData"))
+        {
+            var uriAttr = gd.Attribute("uri");
+            if (uriAttr == null) continue;
+
+            if (uriAttr.Value == "https://schemas.openxmlformats.org/drawingml/2006/picture")
+                uriAttr.Value = "http://schemas.openxmlformats.org/drawingml/2006/picture";
         }
 
         // Save back
@@ -1425,5 +1441,176 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         }
 
         return string.Join("/", segments);
+    }
+
+    /// <summary>
+    /// Fixes Word invariants that aren't covered by OpenXmlValidator but cause "unreadable content" warnings
+    /// </summary>
+    private static void FixWordInvariants(WordprocessingDocument doc, string author, Action<string>? log)
+    {
+        EnsureTableCellsHaveAtLeastOneParagraph(doc, log);
+        EnsureCommentPartsExistIfReferenced(doc, author, log);
+    }
+
+    /// <summary>
+    /// Enumerates all story root elements (main document, headers, footers, footnotes, endnotes)
+    /// </summary>
+    private static IEnumerable<OpenXmlPartRootElement> EnumerateStoryRoots(MainDocumentPart main)
+    {
+        if (main.Document != null)
+            yield return main.Document;
+
+        foreach (var h in main.HeaderParts)
+            if (h.Header != null)
+                yield return h.Header;
+
+        foreach (var f in main.FooterParts)
+            if (f.Footer != null)
+                yield return f.Footer;
+
+        if (main.FootnotesPart?.Footnotes != null)
+            yield return main.FootnotesPart.Footnotes;
+
+        if (main.EndnotesPart?.Endnotes != null)
+            yield return main.EndnotesPart.Endnotes;
+    }
+
+    /// <summary>
+    /// Ensures every table cell has at least one block child (paragraph).
+    /// Word requires this but OpenXmlValidator may not catch missing block content.
+    /// </summary>
+    private static void EnsureTableCellsHaveAtLeastOneParagraph(WordprocessingDocument doc, Action<string>? log)
+    {
+        var main = doc.MainDocumentPart;
+        if (main == null) return;
+
+        foreach (var root in EnumerateStoryRoots(main))
+        {
+            var emptyCells = 0;
+
+            foreach (var tc in root.Descendants<DocumentFormat.OpenXml.Wordprocessing.TableCell>())
+            {
+                // If tc contains only tcPr (or nothing), Word often repairs
+                var hasNonPropertiesChild = tc.ChildElements.Any(e => e is not TableCellProperties);
+
+                if (!hasNonPropertiesChild)
+                {
+                    tc.AppendChild(new Paragraph());
+                    emptyCells++;
+                }
+            }
+
+            if (emptyCells > 0)
+            {
+                log?.Invoke($"Added <w:p/> to {emptyCells} empty table cells in {root.GetType().Name}.");
+                root.Save();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Ensures comment parts exist when comment markers are referenced in story parts.
+    /// This matches what Word does during repair by creating the four comment parts.
+    /// </summary>
+    private static void EnsureCommentPartsExistIfReferenced(WordprocessingDocument doc, string author, Action<string>? log)
+    {
+        var main = doc.MainDocumentPart;
+        if (main == null) return;
+
+        // Collect all comment IDs referenced anywhere in the story parts
+        var referencedIds = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var root in EnumerateStoryRoots(main))
+        {
+            foreach (var s in root.Descendants<CommentRangeStart>())
+                if (!string.IsNullOrWhiteSpace(s.Id?.Value)) referencedIds.Add(s.Id!.Value);
+
+            foreach (var e in root.Descendants<CommentRangeEnd>())
+                if (!string.IsNullOrWhiteSpace(e.Id?.Value)) referencedIds.Add(e.Id!.Value);
+
+            foreach (var r in root.Descendants<CommentReference>())
+                if (!string.IsNullOrWhiteSpace(r.Id?.Value)) referencedIds.Add(r.Id!.Value);
+        }
+
+        if (referencedIds.Count == 0)
+            return;
+
+        log?.Invoke($"Found {referencedIds.Count} referenced comment ids. Ensuring comments parts exist...");
+
+        // 1) comments.xml
+        var commentsPart =
+            main.GetPartsOfType<WordprocessingCommentsPart>().FirstOrDefault()
+            ?? main.AddNewPart<WordprocessingCommentsPart>();
+
+        commentsPart.Comments ??= new Comments();
+
+        var initials = BuildInitials(author);
+
+        var existing = commentsPart.Comments
+            .Elements<DocumentFormat.OpenXml.Wordprocessing.Comment>()
+            .Select(c => c.Id?.Value)
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .ToHashSet(StringComparer.Ordinal);
+
+        var added = 0;
+        foreach (var id in referencedIds)
+        {
+            if (existing.Contains(id))
+                continue;
+
+            // Minimal placeholder comment so Word doesn't repair by creating parts
+            var c = new DocumentFormat.OpenXml.Wordprocessing.Comment
+            {
+                Id = id,
+                Author = author,
+                Initials = initials,
+                Date = DateTime.UtcNow
+            };
+
+            c.AppendChild(new Paragraph(new Run(new Text(""))));
+            commentsPart.Comments.AppendChild(c);
+            added++;
+        }
+
+        if (added > 0)
+            log?.Invoke($"Added {added} placeholder <w:comment> elements to comments.xml.");
+
+        commentsPart.Comments.Save();
+
+        // 2) commentsExtended.xml (w15:commentsEx) - additional comment info
+        var commentsExPart =
+            main.GetPartsOfType<WordprocessingCommentsExPart>().FirstOrDefault()
+            ?? main.AddNewPart<WordprocessingCommentsExPart>();
+
+        commentsExPart.CommentsEx ??= new DocumentFormat.OpenXml.Office2013.Word.CommentsEx();
+        commentsExPart.CommentsEx.Save();
+
+        // 3) commentsIds.xml (w16cid:commentsIds) - durable IDs
+        var commentsIdsPart =
+            main.GetPartsOfType<WordprocessingCommentsIdsPart>().FirstOrDefault()
+            ?? main.AddNewPart<WordprocessingCommentsIdsPart>();
+
+        commentsIdsPart.CommentsIds ??= new DocumentFormat.OpenXml.Office2019.Word.Cid.CommentsIds();
+        commentsIdsPart.CommentsIds.Save();
+
+        // 4) commentsExtensible.xml (w16cex:commentsExtensible) - extra extensible info
+        var commentsExtensiblePart =
+            main.GetPartsOfType<WordCommentsExtensiblePart>().FirstOrDefault()
+            ?? main.AddNewPart<WordCommentsExtensiblePart>();
+
+        commentsExtensiblePart.CommentsExtensible ??=
+            new DocumentFormat.OpenXml.Office2021.Word.CommentsExt.CommentsExtensible();
+
+        commentsExtensiblePart.CommentsExtensible.Save();
+    }
+
+    /// <summary>
+    /// Builds initials from author name (up to 3 characters)
+    /// </summary>
+    private static string BuildInitials(string author)
+    {
+        var parts = author.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var initials = string.Concat(parts.Select(p => char.ToUpperInvariant(p[0])));
+        return initials.Length > 3 ? initials[..3] : initials;
     }
 }
