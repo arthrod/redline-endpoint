@@ -2,8 +2,20 @@ using FastEndpoints;
 using Docxodus;
 using DocumentFormat.OpenXml.Packaging;
 using System.Xml.Linq;
+using System.Text;
 
 namespace RedlineApi.Endpoints.Compare;
+
+/// <summary>
+/// Custom UTF-8 encoding that reports "UTF-8" (uppercase) as its WebName.
+/// This ensures XML declarations use encoding="UTF-8" instead of encoding="utf-8".
+/// </summary>
+public class UppercaseUtf8Encoding : UTF8Encoding
+{
+    public UppercaseUtf8Encoding() : base(false) { } // false = no BOM
+
+    public override string WebName => "UTF-8";
+}
 
 public class CompareRequest
 {
@@ -182,7 +194,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                     // Save with proper settings (no BOM)
                     var settings = new System.Xml.XmlWriterSettings
                     {
-                        Encoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+                        Encoding = new UppercaseUtf8Encoding(),
                         Indent = false,
                         OmitXmlDeclaration = false,
                         NewLineHandling = System.Xml.NewLineHandling.None
@@ -445,7 +457,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
         using var s = part.GetStream(FileMode.Create, FileAccess.Write);
         var settings = new System.Xml.XmlWriterSettings
         {
-            Encoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+            Encoding = new UppercaseUtf8Encoding(),
             Indent = false,
             OmitXmlDeclaration = false,
             NewLineHandling = System.Xml.NewLineHandling.None
