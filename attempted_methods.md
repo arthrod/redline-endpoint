@@ -205,6 +205,140 @@ ls -la original.docx cleaned.docx
 
 ---
 
+---
+
+## Attempt 6: Word Invariants - Comments Parts (2026-01-16)
+
+**What we tried:**
+- Add missing comment parts when comment markers exist (based on Word repair analysis)
+- Add `comments.xml`, `commentsExtended.xml`, `commentsIds.xml`, `commentsExtensible.xml`
+- Ensure empty table cells have at least one paragraph
+- Fix https→http schema URI for graphicData
+
+**Result:** ❌ Still showed warning (our test docs had no comments)
+
+---
+
+## Attempt 7: Paragraph IDs (w14:paraId) (2026-01-16)
+
+**What we tried:**
+- Add `w14:paraId` and `w14:textId` to all paragraphs
+- Add `w:rsidR` and `w:rsidRDefault` attributes
+
+**Discovery:** When manually copying Word-fixed `document.xml` into generated package (experiment9), it worked!
+
+**Result:** ❌ Code-generated version still showed warning
+
+---
+
+## Attempt 8: Date Format + Paragraph IDs (2026-01-16)
+
+**What we tried:**
+- Combined paragraph IDs fix with date normalization
+- Normalize tracked change dates to UTC format: `2026-01-16T19:34:34Z`
+- Remove microseconds and timezone offset
+
+**Manual test (experiment11):** ✅ Worked when manually fixing dates via sed
+
+**Code test (experiment12):** ❌ Still showed warning
+
+**Root cause found:** Code only normalized dates on these elements:
+- `DeletedRun` (w:del with content)
+- `InsertedRun` (w:ins)
+- `Deleted` (w:del empty)
+- `MoveFromRun` (w:moveFrom)
+- `MoveToRun` (w:moveTo)
+
+**Missing elements with dates:**
+- `MoveFromRangeStart` ❌ NOT normalized
+- `MoveToRangeStart` ❌ NOT normalized
+
+**Evidence:**
+```bash
+# experiment12 still had timezone dates:
+<w:moveFromRangeStart w:date="2026-01-16T14:43:45.1771130-05:00" .../>
+```
+
+---
+
+## Key Learnings
+
+### What Word requires for tracked changes documents:
+
+1. **Paragraph IDs** (w14:paraId, w14:textId) on ALL paragraphs
+   - paraId must be < 0x80000000
+   - textId typically "77777777" for unchanged
+
+2. **UTC date format** on ALL tracked change elements:
+   - Format: `YYYY-MM-DDTHH:MM:SSZ`
+   - No microseconds
+   - No timezone offset
+   - **ALL elements with w:date attribute must be normalized**
+
+### Tracked change elements that have w:date:
+- `w:ins` (InsertedRun) - wraps inserted content
+- `w:ins` (Inserted) - inside `w:rPr` for formatting changes ← EASY TO MISS
+- `w:del` (DeletedRun, Deleted) - wraps deleted content
+- `w:moveFrom` (MoveFromRun) - wraps moved-from content
+- `w:moveTo` (MoveToRun) - wraps moved-to content
+- `w:moveFromRangeStart` (MoveFromRangeStart) ← EASY TO MISS
+- `w:moveToRangeStart` (MoveToRangeStart) ← EASY TO MISS
+
+---
+
+## Attempt 9: MoveFromRangeStart/MoveToRangeStart (2026-01-16)
+
+**What we tried:**
+- Added `MoveFromRangeStart` and `MoveToRangeStart` to date normalization
+
+**Result:** ❌ experiment13 still had non-UTC dates
+
+**Root cause found:** There are TWO different `w:ins` element types in OpenXML:
+1. `InsertedRun` - wraps inserted content (e.g., `<w:ins><w:r>...</w:r></w:ins>`)
+2. `Inserted` - inside run properties for formatting changes (e.g., `<w:rPr><w:ins w:date="..."/></w:rPr>`)
+
+Code was only handling `InsertedRun`, not `Inserted`.
+
+---
+
+## Attempt 10: Inserted Class for rPr Changes (2026-01-16)
+
+**What we tried:**
+- Added `Inserted` class handling (w:ins inside w:rPr)
+- Now normalizing dates on ALL 7 tracked change element types:
+  - `DeletedRun`
+  - `InsertedRun`
+  - `Deleted`
+  - `Inserted` ← NEW
+  - `MoveFromRun`
+  - `MoveToRun`
+  - `MoveFromRangeStart`
+  - `MoveToRangeStart`
+
+**Code:**
+```csharp
+// Handle Inserted (w:ins inside rPr for formatting changes)
+foreach (var ins in root.Descendants<Inserted>())
+{
+    if (ins.Date?.HasValue == true)
+    {
+        ins.Date = NormalizeDateToUtc(ins.Date.Value);
+        fixedCount++;
+    }
+}
+```
+
+**Result:** ✅ experiment14 has all UTC dates - awaiting Word verification
+
+**Verification:**
+```bash
+# All dates in UTC format:
+grep -o 'w:date="[^"]*"' diagnosis/experiment14_unpacked/word/document.xml | sort -u
+# Output: w:date="2026-01-16T19:51:57Z"
+```
+
+---
+
 ## References
 
 - [Docxodus GitHub](https://github.com/JSv4/Docxodus)

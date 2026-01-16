@@ -1497,6 +1497,16 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 }
             }
 
+            // Handle Inserted (w:ins inside rPr for formatting changes)
+            foreach (var ins in root.Descendants<Inserted>())
+            {
+                if (ins.Date?.HasValue == true)
+                {
+                    ins.Date = NormalizeDateToUtc(ins.Date.Value);
+                    fixedCount++;
+                }
+            }
+
             foreach (var moveFrom in root.Descendants<MoveFromRun>())
             {
                 if (moveFrom.Date?.HasValue == true)
@@ -1511,6 +1521,25 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 if (moveTo.Date?.HasValue == true)
                 {
                     moveTo.Date = NormalizeDateToUtc(moveTo.Date.Value);
+                    fixedCount++;
+                }
+            }
+
+            // Also fix MoveFromRangeStart and MoveToRangeStart
+            foreach (var moveFromStart in root.Descendants<MoveFromRangeStart>())
+            {
+                if (moveFromStart.Date?.HasValue == true)
+                {
+                    moveFromStart.Date = NormalizeDateToUtc(moveFromStart.Date.Value);
+                    fixedCount++;
+                }
+            }
+
+            foreach (var moveToStart in root.Descendants<MoveToRangeStart>())
+            {
+                if (moveToStart.Date?.HasValue == true)
+                {
+                    moveToStart.Date = NormalizeDateToUtc(moveToStart.Date.Value);
                     fixedCount++;
                 }
             }
