@@ -511,9 +511,122 @@ The corrupted file contains duplicate IDs, which causes Word's XML parser to fai
 
 ---
 
+## Attempt 22: Missing w:rsidR on sectPr (2026-01-16)
+
+**Discovery:** Comparing working vs broken document endings revealed that `<w:sectPr>` elements need `w:rsidR` attribute.
+
+**Broken version (our output):**
+```xml
+<w:sectPr>
+  <w:pgSz .../>
+  ...
+</w:sectPr>
+```
+
+**Working version (Word-repaired):**
+```xml
+<w:sectPr w:rsidR="006E1EB0">
+  <w:pgSz .../>
+  ...
+</w:sectPr>
+```
+
+**The issue:** Docxodus strips the `w:rsidR` attribute from `<w:sectPr>` elements. This attribute is required per ECMA-376 to indicate which editing session last modified the section properties.
+
+**Implementation:**
+- Added `EnsureSectionPropertiesHaveRsid()` method
+- Generates a unique rsid value (ST_LongHexNumber format: 8 hex chars)
+- Ensures the new rsid doesn't conflict with existing rsids in settings.xml
+- Adds the new rsid to the settings.xml rsids list for consistency
+
+**ECMA-376 rsid format requirements:**
+- Type: `ST_LongHexNumber`
+- Length: 4 bytes (8 hexadecimal characters)
+- Word typically generates values starting with "00" in the range 00xxxxxx
+- Each rsid must be unique to represent a distinct editing session
+
+**Test file:** `diagnosis/TEST_sectPr_unique_rsidR.docx`
+
+**Result:** ❌ Still showed warning. sectPr rsidR is NOT the cause.
+
+---
+
+## Attempt 23: Change Author Name (2026-01-16)
+
+**What we tried:**
+- Changed the author name in tracked changes from "Test Author" to "Test User"
+- Tested if the author name format was causing the issue
+
+**Test file:** `diagnosis/TEST_text_author_user.docx`
+
+**Result:** ❌ Still showed warning. Author name is NOT the cause.
+
+---
+
+## Attempt 24: Remove .DS_Store Files from Package (2026-01-16)
+
+**What we tried:**
+- Discovered that .DS_Store files (macOS metadata) were being included in the DOCX package
+- Removed all .DS_Store and ._ resource fork files before packing
+
+**Test file:** `diagnosis/TEST_text_author_user.docx` (repacked without .DS_Store)
+
+**Result:** ❌ Still showed warning. .DS_Store files are NOT the cause.
+
+---
+
+## Attempt 25: Convert Move Operations to Del/Ins (2026-01-16)
+
+**Theory:** Move operations in OOXML are notoriously fragile and Word is very strict about their implementation. The simpler del/ins approach is more robust.
+
+**What we tried:**
+- Convert `<w:moveFrom>` → `<w:del>` (content moved from = deleted from original location)
+- Convert `<w:moveTo>` → `<w:ins>` (content moved to = inserted at new location)
+- Remove all `moveFromRangeStart`, `moveFromRangeEnd`, `moveToRangeStart`, `moveToRangeEnd` elements
+
+**Implementation:**
+- Added `ConvertMoveOperationsToDelIns()` method
+- Preserves author, date, and id attributes during conversion
+- Moves all child elements to the new del/ins wrappers
+
+**Test file:** `diagnosis/TEST_move_to_delins.docx`
+
+**Result:** ✅ SUCCESS! No "unreadable content" warning. Move operations were the cause.
+
+---
+
 ## Current Status
 
-**ROOT CAUSE IDENTIFIED:** ✅ Duplicate `w:id` values across revision elements
+**ROOT CAUSE FOUND AND FIXED:** Move operations (moveFrom/moveTo) in OOXML are fragile. Converting them to simpler del/ins operations fixes the "unreadable content" warning.
+
+**Implemented fixes:**
+1. ✅ `ConvertMoveOperationsToDelIns()` - converts fragile moves to robust del/ins (THE FIX)
+2. ✅ `EnsureUniqueRevisionIds()` - deduplicates w:id on revision elements
+3. ✅ `EnsureSectionPropertiesHaveRsid()` - adds w:rsidR to sectPr elements
+
+---
+
+## Known Issues (Not Bugs - Expected Behavior from Docxodus)
+
+These are limitations in how Docxodus/WmlComparer detects changes, not issues with our fix:
+
+### 1. Words Added Without Space Show Full Addition
+When adding words directly after punctuation without a space, the entire combined text is marked as added.
+
+**Example:**
+- Original: `significados:`
+- Modified: `significados:blablablabla`
+- Expected redline: `significados:` + <ins>`blablablabla`</ins>
+- Actual redline: <ins>`significados:blablablabla`</ins> (whole thing marked as added)
+
+### 2. Paragraph Removal Shows Remaining Text as Added
+When removing a whole paragraph and merging content, the remaining portion is marked as added instead of unchanged.
+
+**Example:**
+- Original: `blabla` (par 1) + `bla` (par 2) + `ugabuga` (par 3)
+- Modified: Remove middle paragraph, merge → `blabla` + `buga`
+- Expected: `blabla` unchanged, `bla` deleted, `uga` deleted, `buga` unchanged
+- Actual: `buga` marked as added
 
 **Ruled out causes:**
 1. ❌ XML declaration format (uppercase UTF-8, standalone=yes)
@@ -527,15 +640,9 @@ The corrupted file contains duplicate IDs, which causes Word's XML parser to fai
 
 **What works:** `TEST_with_working_docxml.docx` - copying Word-repaired document.xml into our package
 
-**Fix needed:** Ensure unique `w:id` values across all revision elements:
-- `w:ins`
-- `w:del`
-- `w:moveFrom`
-- `w:moveTo`
-- `w:moveFromRangeStart`
-- `w:moveFromRangeEnd`
-- `w:moveToRangeStart`
-- `w:moveToRangeEnd`
+**Implemented fixes:**
+- `EnsureUniqueRevisionIds()` - deduplicates w:id on revision elements
+- `EnsureSectionPropertiesHaveRsid()` - adds w:rsidR to sectPr elements
 
 ---
 

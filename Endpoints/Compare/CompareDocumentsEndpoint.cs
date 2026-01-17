@@ -1495,12 +1495,13 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     /// </summary>
     private static void FixWordInvariants(WordprocessingDocument doc, string author, Action<string>? log)
     {
-        DeduplicateMoveOperations(doc, log);
+        ConvertMoveOperationsToDelIns(doc, log);  // Convert fragile moves to simpler del/ins
         EnsureParagraphIds(doc, log);
         NormalizeTrackedChangeDates(doc, log);
         EnsureTableCellsHaveAtLeastOneParagraph(doc, log);
         EnsureCommentPartsExistIfReferenced(doc, author, log);
         EnsureUniqueRevisionIds(doc, log);
+        EnsureSectionPropertiesHaveRsid(doc, log);
     }
 
     /// <summary>
@@ -1638,9 +1639,199 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     }
 
     /// <summary>
+    /// Ensures all w:sectPr elements have a w:rsidR attribute.
+    /// Docxodus strips this required attribute, causing Word "unreadable content" warnings.
+    /// Generates a new unique rsid that doesn't conflict with existing ones.
+    /// </summary>
+    private static void EnsureSectionPropertiesHaveRsid(WordprocessingDocument doc, Action<string>? log)
+    {
+        var main = doc.MainDocumentPart;
+        if (main?.Document?.Body == null) return;
+
+        var sectionsFixed = 0;
+
+        // Collect all existing rsid values to avoid conflicts
+        var existingRsids = GetAllExistingRsids(doc);
+
+        // Generate a new unique rsid for sectPr elements
+        string rsidValue = GenerateUniqueRsid(existingRsids);
+
+        // Find all SectionProperties in the document body
+        foreach (var sectPr in main.Document.Body.Descendants<SectionProperties>())
+        {
+            if (sectPr.RsidR == null)
+            {
+                sectPr.RsidR = new HexBinaryValue(rsidValue);
+                sectionsFixed++;
+            }
+        }
+
+        if (sectionsFixed > 0)
+        {
+            // Also add this new rsid to settings.xml rsids list for consistency
+            AddRsidToSettings(doc, rsidValue);
+            main.Document.Save();
+            log?.Invoke($"Added w:rsidR=\"{rsidValue}\" to {sectionsFixed} section properties.");
+        }
+    }
+
+    /// <summary>
+    /// Collects all existing rsid values from settings.xml
+    /// </summary>
+    private static HashSet<string> GetAllExistingRsids(WordprocessingDocument doc)
+    {
+        var rsids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var settingsPart = doc.MainDocumentPart?.DocumentSettingsPart;
+        if (settingsPart?.Settings == null) return rsids;
+
+        // Get rsidRoot
+        var rsidRoot = settingsPart.Settings.Descendants<RsidRoot>().FirstOrDefault();
+        if (rsidRoot?.Val?.Value != null)
+            rsids.Add(rsidRoot.Val.Value);
+
+        // Get all rsid entries
+        foreach (var rsid in settingsPart.Settings.Descendants<Rsid>())
+        {
+            if (rsid.Val?.Value != null)
+                rsids.Add(rsid.Val.Value);
+        }
+
+        return rsids;
+    }
+
+    /// <summary>
+    /// Generates a unique rsid value that doesn't exist in the given set.
+    /// Per ECMA-376, rsid is ST_LongHexNumber (4 bytes / 8 hex chars).
+    /// Word generates these randomly, typically in range 00xxxxxx.
+    /// </summary>
+    private static string GenerateUniqueRsid(HashSet<string> existingRsids)
+    {
+        var random = new Random();
+        string candidate;
+        do
+        {
+            // Generate in Word's typical range: 00010000 to 00FFFFFF
+            var value = random.Next(0x00010000, 0x00FFFFFF);
+            candidate = value.ToString("X8");
+        } while (existingRsids.Contains(candidate));
+
+        return candidate;
+    }
+
+    /// <summary>
+    /// Adds a new rsid value to the settings.xml rsids list
+    /// </summary>
+    private static void AddRsidToSettings(WordprocessingDocument doc, string rsidValue)
+    {
+        var settingsPart = doc.MainDocumentPart?.DocumentSettingsPart;
+        if (settingsPart?.Settings == null) return;
+
+        // Find the rsids container
+        var rsidsElement = settingsPart.Settings.Descendants<Rsids>().FirstOrDefault();
+        if (rsidsElement == null) return;
+
+        // Add new rsid entry
+        rsidsElement.AppendChild(new Rsid { Val = new HexBinaryValue(rsidValue) });
+        settingsPart.Settings.Save();
+    }
+
+    /// <summary>
+    /// Converts move operations (moveFrom/moveTo) to simpler del/ins operations.
+    /// Move operations in OOXML are fragile and Word is very strict about them.
+    /// The simpler del/ins approach is more robust.
+    /// - moveFrom → del (content moved from here = deleted)
+    /// - moveTo → ins (content moved to here = inserted)
+    /// - Remove all moveFromRangeStart/End, moveToRangeStart/End elements
+    /// </summary>
+    private static void ConvertMoveOperationsToDelIns(WordprocessingDocument doc, Action<string>? log)
+    {
+        var main = doc.MainDocumentPart;
+        if (main == null) return;
+
+        var totalConverted = 0;
+        var totalRangesRemoved = 0;
+
+        foreach (var root in EnumerateStoryRoots(main))
+        {
+            // Convert MoveFromRun to DeletedRun
+            foreach (var moveFrom in root.Descendants<MoveFromRun>().ToList())
+            {
+                var del = new DeletedRun
+                {
+                    Author = moveFrom.Author?.Value,
+                    Date = moveFrom.Date?.Value,
+                    Id = moveFrom.Id?.Value
+                };
+
+                // Move all children to the new del element
+                foreach (var child in moveFrom.ChildElements.ToList())
+                {
+                    child.Remove();
+                    del.AppendChild(child);
+                }
+
+                moveFrom.InsertAfterSelf(del);
+                moveFrom.Remove();
+                totalConverted++;
+            }
+
+            // Convert MoveToRun to InsertedRun
+            foreach (var moveTo in root.Descendants<MoveToRun>().ToList())
+            {
+                var ins = new InsertedRun
+                {
+                    Author = moveTo.Author?.Value,
+                    Date = moveTo.Date?.Value,
+                    Id = moveTo.Id?.Value
+                };
+
+                // Move all children to the new ins element
+                foreach (var child in moveTo.ChildElements.ToList())
+                {
+                    child.Remove();
+                    ins.AppendChild(child);
+                }
+
+                moveTo.InsertAfterSelf(ins);
+                moveTo.Remove();
+                totalConverted++;
+            }
+
+            // Remove all move range markers (they're no longer needed)
+            foreach (var rangeStart in root.Descendants<MoveFromRangeStart>().ToList())
+            {
+                rangeStart.Remove();
+                totalRangesRemoved++;
+            }
+            foreach (var rangeEnd in root.Descendants<MoveFromRangeEnd>().ToList())
+            {
+                rangeEnd.Remove();
+                totalRangesRemoved++;
+            }
+            foreach (var rangeStart in root.Descendants<MoveToRangeStart>().ToList())
+            {
+                rangeStart.Remove();
+                totalRangesRemoved++;
+            }
+            foreach (var rangeEnd in root.Descendants<MoveToRangeEnd>().ToList())
+            {
+                rangeEnd.Remove();
+                totalRangesRemoved++;
+            }
+
+            if (totalConverted > 0 || totalRangesRemoved > 0)
+                root.Save();
+        }
+
+        if (totalConverted > 0 || totalRangesRemoved > 0)
+            log?.Invoke($"Converted {totalConverted} move operations to del/ins, removed {totalRangesRemoved} range markers.");
+    }
+
+    /// <summary>
     /// Deduplicates move operations by w:name attribute.
     /// Docxodus creates multiple moveFrom/moveTo with the same name, but Word expects only one pair per name.
     /// Also keeps only one MoveFromRun and one MoveToRun per unique move.
+    /// NOTE: This is now obsolete since ConvertMoveOperationsToDelIns converts all moves.
     /// </summary>
     private static void DeduplicateMoveOperations(WordprocessingDocument doc, Action<string>? log)
     {
