@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: redline-api-ingress
+  namespace: redline-api
+  annotations:
+    # NGINX ingress controller settings
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    # SSL redirect (enable when you have TLS configured)
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Rate limiting (optional - RapidAPI handles this, but adds defense in depth)
+    # nginx.ingress.kubernetes.io/limit-rps: "50"
+spec:
+  ingressClassName: nginx
+  rules:
+    # Replace with your actual domain
+    - host: redline-api.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: redline-api
+                port:
+                  number: 8080
+  # Uncomment and configure for TLS
+  # tls:
+  #   - hosts:
+  #       - redline-api.yourdomain.com
+  #     secretName: redline-api-tls

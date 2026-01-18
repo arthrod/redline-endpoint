@@ -47,6 +47,11 @@ debug.log
 .env.*
 appsettings.*.local.json
 
+# Kubernetes secrets (contain sensitive data)
+k8s/secret.yaml
+**/secret.yaml
+*-secret.yaml
+
 # Misc
 .qodo/
 *.tmp

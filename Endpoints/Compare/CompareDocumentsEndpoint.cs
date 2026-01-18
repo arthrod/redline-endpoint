@@ -36,6 +36,18 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
 
     public override async Task HandleAsync(CompareRequest req, CancellationToken ct)
     {
+        // Validate RapidAPI Proxy Secret in production
+        var expectedSecret = Environment.GetEnvironmentVariable("RAPIDAPI_PROXY_SECRET");
+        if (!string.IsNullOrEmpty(expectedSecret))
+        {
+            var proxySecret = HttpContext.Request.Headers["X-RapidAPI-Proxy-Secret"].FirstOrDefault();
+            if (proxySecret != expectedSecret)
+            {
+                await SendUnauthorizedAsync(ct);
+                return;
+            }
+        }
+
         // Validate files are DOCX
         if (!req.Original.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase) ||
             !req.Modified.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))

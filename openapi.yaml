@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  title: Redline Document Comparison
+  description: |
+    Compare two Word DOCX documents and generate a redlined version with tracked changes.
+    Perfect for legal, publishing, compliance, and business document workflows.
+
+    ## Features
+    - Legal-grade accuracy powered by enterprise comparison technology
+    - Word-compatible output with native Track Changes support
+    - Custom author attribution for audit trails
+    - Fast processing - compare documents in seconds
+
+    ## How It Works
+    1. Upload your original DOCX document
+    2. Upload your modified DOCX document
+    3. Optionally specify an author name for tracked changes
+    4. Receive a redlined DOCX with all differences highlighted
+  version: "1.0.0"
+  x-category: "Data"
+  x-logo:
+    url: "https://example.com/logo.png"
+  contact:
+    name: API Support
+    url: https://github.com/arthrod/redline-endpoint
+servers:
+  - url: https://redline-document-comparison.p.rapidapi.com
+    description: RapidAPI Gateway
+paths:
+  /api/compare:
+    post:
+      summary: Compare Documents
+      description: |
+        Compare two DOCX documents and return a redlined version with tracked changes.
+
+        The output document includes:
+        - Insertions (new text) shown underlined in color
+        - Deletions (removed text) shown with strikethrough
+        - Formatting changes between versions
+
+        Compatible with Microsoft Word's Track Changes feature.
+      operationId: compareDocuments
+      tags:
+        - Document Comparison
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - Original
+                - Modified
+              properties:
+                Original:
+                  type: string
+                  format: binary
+                  description: The original/base DOCX document to compare against
+                Modified:
+                  type: string
+                  format: binary
+                  description: The modified/revised DOCX document
+                Author:
+                  type: string
+                  description: Author name to attribute tracked changes to (default "User")
+                  example: "Legal Review Team"
+            encoding:
+              Original:
+                contentType: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+              Modified:
+                contentType: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      responses:
+        "200":
+          description: Redlined document generated successfully
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: 'attachment; filename="redlined.docx"'
+        "400":
+          description: Invalid request - wrong file format or missing files
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                wrongFormat:
+                  summary: Wrong file format
+                  value:
+                    statusCode: 400
+                    message: "Both files must be .docx format"
+                    errors: {}
+        "401":
+          description: Unauthorized - invalid or missing RapidAPI credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Server error during document processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                processingError:
+                  summary: Processing failed
+                  value:
+                    statusCode: 500
+                    message: "Failed to compare documents: Invalid document structure"
+                    errors: {}
+  /health:
+    get:
+      summary: Health Check
+      description: Check if the API is healthy and responding
+      operationId: healthCheck
+      tags:
+        - System
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: "1.0.0"
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP status code
+        message:
+          type: string
+          description: Error message
+        errors:
+          type: object
+          description: Additional error details
+  securitySchemes:
+    RapidAPIKey:
+      type: apiKey
+      in: header
+      name: X-RapidAPI-Key
+      description: Your RapidAPI application key
+    RapidAPIHost:
+      type: apiKey
+      in: header
+      name: X-RapidAPI-Host
+      description: The API host (redline-document-comparison.p.rapidapi.com)
+security:
+  - RapidAPIKey: []
+    RapidAPIHost: []
+tags:
+  - name: Document Comparison
+    description: Document comparison and redlining operations
+  - name: System
+    description: System health and status endpoints

@@ -1,0 +1,708 @@
+# RapidAPI Listing Configuration - Redline Document Comparison
+
+Complete configuration guide for publishing on RapidAPI Hub.
+
+---
+
+## GENERAL INFORMATION
+
+### API Name
+```
+Redline Document Comparison
+```
+**Note**: Do NOT include "API" in the name - RapidAPI auto-appends it.
+
+### Category
+**Data** or **Text Analysis** (select based on available options)
+
+### Short Description (max ~150 chars)
+```
+Compare two Word DOCX documents and generate a redlined version with tracked changes. Legal-quality document comparison.
+```
+
+### Long Description (Markdown)
+```markdown
+## Professional Document Comparison API
+
+Transform document review workflows with automated, accurate redline generation. Upload two DOCX files and receive a Word-compatible document with all changes tracked—insertions, deletions, and formatting modifications clearly highlighted.
+
+### Key Features
+
+- **Legal-Grade Accuracy**: Powered by enterprise document comparison technology
+- **Word-Compatible Output**: Opens flawlessly in Microsoft Word with native Track Changes
+- **Custom Author Attribution**: Tag revisions with reviewer names for audit trails
+- **Fast Processing**: Compare documents in seconds, not minutes
+- **Clean Output**: Post-processed for maximum Word compatibility
+
+### Perfect For
+
+- **Legal Teams**: Contract revisions, agreement amendments, legal document review
+- **Publishing**: Manuscript editing, content revisions, collaborative writing
+- **Compliance**: Policy updates, regulatory document changes, version control
+- **Business**: Proposal iterations, report updates, specification changes
+
+### How It Works
+
+1. Upload your **original** DOCX document
+2. Upload your **modified** DOCX document
+3. Optionally specify an **author name** for tracked changes
+4. Receive a redlined DOCX with all differences highlighted
+
+### Output Quality
+
+The API produces Word documents that:
+- Open without warnings in Microsoft Word
+- Display proper Track Changes formatting
+- Include insertions (underlined, colored) and deletions (strikethrough)
+- Support "Accept/Reject Changes" workflow in Word
+- Maintain original document formatting
+```
+
+### Website (optional)
+```
+https://github.com/arthrod/redline-endpoint
+```
+
+---
+
+## VERSION SPECIFIC CONFIGURATION
+
+### Base URL
+```
+https://your-k8s-domain.com
+```
+*(Replace with your actual Kubernetes ingress domain)*
+
+For local testing:
+```
+http://localhost:8080
+```
+
+### Health Check URL
+```
+https://your-k8s-domain.com/health
+```
+
+**Note**: You need to add a health check endpoint to the API. See "Required Code Changes" section below.
+
+---
+
+## ENDPOINT DEFINITIONS
+
+### Compare Documents Endpoint
+
+| Field | Value |
+|-------|-------|
+| **Name** | Compare Documents |
+| **Description** | Compare two DOCX documents and generate a redlined version with tracked changes |
+| **Method** | POST |
+| **Path** | `/api/compare` |
+
+#### Request Parameters
+
+| Parameter | Type | Location | Required | Description |
+|-----------|------|----------|----------|-------------|
+| `Original` | file | formData | Yes | The original/base DOCX document |
+| `Modified` | file | formData | Yes | The modified/revised DOCX document |
+| `Author` | string | formData | No | Author name for tracked changes (default: "User") |
+
+#### Request Headers
+
+| Header | Value | Required |
+|--------|-------|----------|
+| `Content-Type` | `multipart/form-data` | Yes |
+
+#### Response
+
+**Success (200 OK)**
+```
+Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+Content-Disposition: attachment; filename="redlined.docx"
+Body: [Binary DOCX file]
+```
+
+**Error (400 Bad Request)**
+```json
+{
+  "statusCode": 400,
+  "message": "Both files must be .docx format",
+  "errors": {}
+}
+```
+
+**Error (500 Internal Server Error)**
+```json
+{
+  "statusCode": 500,
+  "message": "Failed to compare documents: [error details]",
+  "errors": {}
+}
+```
+
+---
+
+## SECURITY CONFIGURATION
+
+### Gateway DNS
+Use the RapidAPI gateway: `redline-api.p.rapidapi.com` (will be assigned)
+
+### Firewall Settings
+
+**X-RapidAPI-Proxy-Secret**: Enable and configure
+
+Your API should validate this header to ensure requests come only from RapidAPI infrastructure.
+
+**Recommended Configuration:**
+1. Enable "Whitelist RapidAPI IPs"
+2. Enable X-RapidAPI-Proxy-Secret validation
+3. Add the secret as an environment variable in your Kubernetes deployment
+
+### Threat Protection
+- **Enable**: SQL/JavaScript injection protection
+- **Enable**: Request Schema Validation
+
+### Request Configurations
+
+| Setting | Value | Rationale |
+|---------|-------|-----------|
+| **Request Size Limit** | 50 MB | DOCX files can be large with embedded images |
+| **Proxy Timeout** | 120 Sec | Complex documents may take longer to process |
+
+### Secret Headers & Parameters
+
+| Name | Value | Type | Description |
+|------|-------|------|-------------|
+| `X-RapidAPI-Proxy-Secret` | `[Auto-generated by RapidAPI]` | Header | Validates requests originate from RapidAPI |
+
+---
+
+## DOCS TAB (README)
+
+```markdown
+# Redline Document Comparison API
+
+Generate professional redlined documents by comparing two Word DOCX files. Perfect for legal, publishing, and business document workflows.
+
+## Quick Start
+
+### Basic Comparison
+
+```bash
+curl --request POST \
+  --url https://redline-api.p.rapidapi.com/api/compare \
+  --header 'X-RapidAPI-Host: redline-api.p.rapidapi.com' \
+  --header 'X-RapidAPI-Key: YOUR_API_KEY' \
+  --form 'Original=@original.docx' \
+  --form 'Modified=@modified.docx' \
+  --output redlined.docx
+```
+
+### With Custom Author
+
+```bash
+curl --request POST \
+  --url https://redline-api.p.rapidapi.com/api/compare \
+  --header 'X-RapidAPI-Host: redline-api.p.rapidapi.com' \
+  --header 'X-RapidAPI-Key: YOUR_API_KEY' \
+  --form 'Original=@original.docx' \
+  --form 'Modified=@modified.docx' \
+  --form 'Author=Legal Review Team' \
+  --output redlined.docx
+```
+
+## Code Examples
+
+### Python
+
+```python
+import requests
+
+url = "https://redline-api.p.rapidapi.com/api/compare"
+
+headers = {
+    "X-RapidAPI-Key": "YOUR_API_KEY",
+    "X-RapidAPI-Host": "redline-api.p.rapidapi.com"
+}
+
+files = {
+    "Original": open("original.docx", "rb"),
+    "Modified": open("modified.docx", "rb")
+}
+
+data = {
+    "Author": "Reviewer Name"  # Optional
+}
+
+response = requests.post(url, headers=headers, files=files, data=data)
+
+with open("redlined.docx", "wb") as f:
+    f.write(response.content)
+
+print("Redlined document saved!")
+```
+
+### JavaScript (Node.js)
+
+```javascript
+const FormData = require('form-data');
+const fs = require('fs');
+const axios = require('axios');
+
+const form = new FormData();
+form.append('Original', fs.createReadStream('original.docx'));
+form.append('Modified', fs.createReadStream('modified.docx'));
+form.append('Author', 'Reviewer Name'); // Optional
+
+const response = await axios.post(
+  'https://redline-api.p.rapidapi.com/api/compare',
+  form,
+  {
+    headers: {
+      ...form.getHeaders(),
+      'X-RapidAPI-Key': 'YOUR_API_KEY',
+      'X-RapidAPI-Host': 'redline-api.p.rapidapi.com'
+    },
+    responseType: 'arraybuffer'
+  }
+);
+
+fs.writeFileSync('redlined.docx', response.data);
+console.log('Redlined document saved!');
+```
+
+### C# (.NET)
+
+```csharp
+using var client = new HttpClient();
+using var content = new MultipartFormDataContent();
+
+content.Add(new StreamContent(File.OpenRead("original.docx")), "Original", "original.docx");
+content.Add(new StreamContent(File.OpenRead("modified.docx")), "Modified", "modified.docx");
+content.Add(new StringContent("Reviewer Name"), "Author"); // Optional
+
+client.DefaultRequestHeaders.Add("X-RapidAPI-Key", "YOUR_API_KEY");
+client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "redline-api.p.rapidapi.com");
+
+var response = await client.PostAsync(
+    "https://redline-api.p.rapidapi.com/api/compare",
+    content
+);
+
+var bytes = await response.Content.ReadAsByteArrayAsync();
+await File.WriteAllBytesAsync("redlined.docx", bytes);
+```
+
+### Java
+
+```java
+import okhttp3.*;
+import java.io.*;
+
+OkHttpClient client = new OkHttpClient();
+
+RequestBody body = new MultipartBody.Builder()
+    .setType(MultipartBody.FORM)
+    .addFormDataPart("Original", "original.docx",
+        RequestBody.create(new File("original.docx"),
+        MediaType.parse("application/vnd.openxmlformats-officedocument.wordprocessingml.document")))
+    .addFormDataPart("Modified", "modified.docx",
+        RequestBody.create(new File("modified.docx"),
+        MediaType.parse("application/vnd.openxmlformats-officedocument.wordprocessingml.document")))
+    .addFormDataPart("Author", "Reviewer Name") // Optional
+    .build();
+
+Request request = new Request.Builder()
+    .url("https://redline-api.p.rapidapi.com/api/compare")
+    .post(body)
+    .addHeader("X-RapidAPI-Key", "YOUR_API_KEY")
+    .addHeader("X-RapidAPI-Host", "redline-api.p.rapidapi.com")
+    .build();
+
+Response response = client.newCall(request).execute();
+Files.write(Paths.get("redlined.docx"), response.body().bytes());
+```
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `Original` | File (.docx) | Yes | The original/baseline document |
+| `Modified` | File (.docx) | Yes | The revised document to compare against the original |
+| `Author` | String | No | Name to attribute tracked changes to (default: "User") |
+
+## Response
+
+### Success (200 OK)
+
+Returns a binary DOCX file with tracked changes showing:
+- **Insertions**: New text added in the modified document (typically shown underlined in color)
+- **Deletions**: Text removed from the original (typically shown with strikethrough)
+- **Formatting changes**: Style modifications between versions
+
+The output document is fully compatible with Microsoft Word's Track Changes feature.
+
+### Error Responses
+
+| Status | Cause | Response |
+|--------|-------|----------|
+| 400 | Invalid file format | `{"message": "Both files must be .docx format"}` |
+| 500 | Processing error | `{"message": "Failed to compare documents: [details]"}` |
+
+## File Requirements
+
+- **Format**: Microsoft Word (.docx) - Open XML format only
+- **NOT supported**: Legacy .doc format, RTF, PDF, or other formats
+- **Maximum size**: 50 MB per file
+- **Encoding**: Standard DOCX (ZIP-based OOXML)
+
+## Best Practices
+
+1. **Use clean documents**: Remove excessive formatting or embedded objects for faster processing
+2. **Consistent formatting**: Documents with similar base styles produce cleaner comparisons
+3. **Meaningful author names**: Use descriptive author names for better audit trails
+4. **Version control**: Keep copies of original files for reference
+
+## Rate Limits
+
+Rate limits depend on your subscription plan. Check the pricing tab for details on:
+- Requests per month
+- Requests per second
+- File size limits
+
+## Support
+
+For technical issues or feature requests, contact support through RapidAPI.
+```
+
+---
+
+## PRICING PLANS
+
+### Recommended Pricing Structure
+
+#### BASIC (Free Tier)
+```
+Price: $0.00/month
+Quota: 10 requests/month
+Rate Limit: 1 request/second
+```
+*Purpose: Allow testing and evaluation*
+
+#### PRO
+```
+Price: $9.99/month
+Quota: 500 requests/month
+Overage: $0.05 per additional request
+Rate Limit: 5 requests/second
+```
+*Purpose: Small teams, occasional use*
+
+#### ULTRA
+```
+Price: $49.99/month
+Quota: 5,000 requests/month
+Overage: $0.02 per additional request
+Rate Limit: 10 requests/second
+```
+*Purpose: Medium businesses, regular document workflows*
+
+#### MEGA
+```
+Price: $199.99/month
+Quota: 50,000 requests/month
+Overage: $0.01 per additional request
+Rate Limit: 25 requests/second
+```
+*Purpose: Enterprise, high-volume document processing*
+
+### Feature Differentiation (Optional)
+
+| Feature | BASIC | PRO | ULTRA | MEGA |
+|---------|-------|-----|-------|------|
+| Document Comparison | Yes | Yes | Yes | Yes |
+| Custom Author | Yes | Yes | Yes | Yes |
+| Priority Support | No | No | Yes | Yes |
+| SLA Guarantee | No | No | 99.5% | 99.9% |
+
+---
+
+## TERMS OF USE
+
+```
+Redline Document Comparison API - Terms of Use
+
+1. ACCEPTABLE USE
+   - Use the API for legitimate document comparison purposes
+   - Do not attempt to reverse-engineer the comparison algorithm
+   - Do not use the service for processing illegal or harmful content
+
+2. DATA HANDLING
+   - Documents are processed in memory and not stored
+   - No document content is logged or retained after processing
+   - API requests may be logged for usage tracking (metadata only)
+
+3. LIMITATIONS
+   - Maximum file size: 50 MB per document
+   - Supported format: DOCX (Open XML) only
+   - Processing timeout: 120 seconds per request
+
+4. LIABILITY
+   - The API is provided "as-is" without warranty
+   - We are not liable for document processing errors
+   - Users should verify output documents for accuracy
+
+5. RATE LIMITS
+   - Subscription plan limits apply as specified
+   - Excessive requests may result in temporary blocking
+
+6. CHANGES
+   - Terms may be updated with notice through RapidAPI
+   - Continued use constitutes acceptance of updated terms
+
+Last Updated: January 2026
+```
+
+---
+
+## REQUIRED CODE CHANGES
+
+### 1. Add Health Check Endpoint
+
+Create a new file `Endpoints/HealthEndpoint.cs`:
+
+```csharp
+using FastEndpoints;
+
+namespace RedlineApi.Endpoints;
+
+public class HealthEndpoint : EndpointWithoutRequest
+{
+    public override void Configure()
+    {
+        Get("/health");
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync(CancellationToken ct)
+    {
+        await SendOkAsync(new { status = "healthy", timestamp = DateTime.UtcNow }, ct);
+    }
+}
+```
+
+### 2. Add RapidAPI Proxy Secret Validation
+
+Update `CompareDocumentsEndpoint.cs` to validate the RapidAPI proxy secret:
+
+```csharp
+public override async Task HandleAsync(CompareRequest req, CancellationToken ct)
+{
+    // Validate RapidAPI Proxy Secret in production
+    var proxySecret = HttpContext.Request.Headers["X-RapidAPI-Proxy-Secret"].FirstOrDefault();
+    var expectedSecret = Environment.GetEnvironmentVariable("RAPIDAPI_PROXY_SECRET");
+
+    if (!string.IsNullOrEmpty(expectedSecret) && proxySecret != expectedSecret)
+    {
+        await SendUnauthorizedAsync(ct);
+        return;
+    }
+
+    // ... rest of the handler
+}
+```
+
+### 3. Environment Variables for Kubernetes
+
+Add to your Kubernetes deployment:
+
+```yaml
+env:
+  - name: RAPIDAPI_PROXY_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: rapidapi-secrets
+        key: proxy-secret
+  - name: ASPNETCORE_ENVIRONMENT
+    value: "Production"
+  - name: ASPNETCORE_URLS
+    value: "http://+:8080"
+```
+
+---
+
+## KUBERNETES DEPLOYMENT
+
+### Ingress Configuration Example
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: redline-api-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+spec:
+  rules:
+    - host: redline-api.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: redline-api
+                port:
+                  number: 8080
+```
+
+### Service Configuration
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redline-api
+spec:
+  selector:
+    app: redline-api
+  ports:
+    - port: 8080
+      targetPort: 8080
+```
+
+### Deployment Configuration
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redline-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redline-api
+  template:
+    metadata:
+      labels:
+        app: redline-api
+    spec:
+      containers:
+        - name: redline-api
+          image: your-registry/redline-api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: RAPIDAPI_PROXY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: rapidapi-secrets
+                  key: proxy-secret
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+```
+
+---
+
+## OPENAPI SPECIFICATION
+
+If needed, here's an OpenAPI 3.0 spec for upload:
+
+```yaml
+openapi: 3.0.3
+info:
+  title: Redline Document Comparison API
+  description: Compare two Word DOCX documents and generate a redlined version with tracked changes
+  version: "1.0"
+paths:
+  /api/compare:
+    post:
+      summary: Compare Documents
+      description: Compare two DOCX documents and return a redlined version with tracked changes
+      operationId: compareDocuments
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - Original
+                - Modified
+              properties:
+                Original:
+                  type: string
+                  format: binary
+                  description: The original/base DOCX document
+                Modified:
+                  type: string
+                  format: binary
+                  description: The modified/revised DOCX document
+                Author:
+                  type: string
+                  description: Author name for tracked changes (default "User")
+      responses:
+        "200":
+          description: Redlined document generated successfully
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Invalid request (wrong file format)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  message:
+                    type: string
+        "500":
+          description: Server error during document processing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  message:
+                    type: string
+```
+
+---
+
+## CHECKLIST BEFORE PUBLISHING
+
+- [ ] Add health check endpoint to codebase
+- [ ] Add RapidAPI proxy secret validation
+- [ ] Deploy to Kubernetes with proper secrets
+- [ ] Configure Ingress with 50MB body size limit
+- [ ] Configure Ingress with 120s timeout
+- [ ] Test API through RapidAPI gateway
+- [ ] Verify health check is responding
+- [ ] Set up monitoring/alerting for the endpoint
+- [ ] Review and finalize pricing tiers
+- [ ] Upload API logo (500x500 PNG/JPEG)
+- [ ] Set visibility to Public after testing
