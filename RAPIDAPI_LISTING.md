@@ -69,21 +69,13 @@ https://github.com/arthrod/redline-endpoint
 
 ### Base URL
 ```
-https://your-k8s-domain.com
-```
-*(Replace with your actual Kubernetes ingress domain)*
-
-For local testing:
-```
-http://localhost:8080
+https://redline-api.cicero.im
 ```
 
 ### Health Check URL
 ```
-https://your-k8s-domain.com/health
+https://redline-api.cicero.im/health
 ```
-
-**Note**: You need to add a health check endpoint to the API. See "Required Code Changes" section below.
 
 ---
 
@@ -464,161 +456,19 @@ Last Updated: January 2026
 
 ---
 
-## REQUIRED CODE CHANGES
+## CURRENT DEPLOYMENT
 
-### 1. Add Health Check Endpoint
+### Infrastructure
+- **Live URL**: `https://redline-api.cicero.im`
+- **Image**: `ghcr.io/arthrod/redline-endpoint:latest` (private)
+- **Namespace**: `redline-api`
+- **Replicas**: 2 pods with HPA (scales 2-10)
+- **Tunnel**: Cloudflare Tunnel → ClusterIP
 
-Create a new file `Endpoints/HealthEndpoint.cs`:
-
-```csharp
-using FastEndpoints;
-
-namespace RedlineApi.Endpoints;
-
-public class HealthEndpoint : EndpointWithoutRequest
-{
-    public override void Configure()
-    {
-        Get("/health");
-        AllowAnonymous();
-    }
-
-    public override async Task HandleAsync(CancellationToken ct)
-    {
-        await SendOkAsync(new { status = "healthy", timestamp = DateTime.UtcNow }, ct);
-    }
-}
-```
-
-### 2. Add RapidAPI Proxy Secret Validation
-
-Update `CompareDocumentsEndpoint.cs` to validate the RapidAPI proxy secret:
-
-```csharp
-public override async Task HandleAsync(CompareRequest req, CancellationToken ct)
-{
-    // Validate RapidAPI Proxy Secret in production
-    var proxySecret = HttpContext.Request.Headers["X-RapidAPI-Proxy-Secret"].FirstOrDefault();
-    var expectedSecret = Environment.GetEnvironmentVariable("RAPIDAPI_PROXY_SECRET");
-
-    if (!string.IsNullOrEmpty(expectedSecret) && proxySecret != expectedSecret)
-    {
-        await SendUnauthorizedAsync(ct);
-        return;
-    }
-
-    // ... rest of the handler
-}
-```
-
-### 3. Environment Variables for Kubernetes
-
-Add to your Kubernetes deployment:
-
-```yaml
-env:
-  - name: RAPIDAPI_PROXY_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: rapidapi-secrets
-        key: proxy-secret
-  - name: ASPNETCORE_ENVIRONMENT
-    value: "Production"
-  - name: ASPNETCORE_URLS
-    value: "http://+:8080"
-```
-
----
-
-## KUBERNETES DEPLOYMENT
-
-### Ingress Configuration Example
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: redline-api-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
-spec:
-  rules:
-    - host: redline-api.yourdomain.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: redline-api
-                port:
-                  number: 8080
-```
-
-### Service Configuration
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: redline-api
-spec:
-  selector:
-    app: redline-api
-  ports:
-    - port: 8080
-      targetPort: 8080
-```
-
-### Deployment Configuration
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: redline-api
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: redline-api
-  template:
-    metadata:
-      labels:
-        app: redline-api
-    spec:
-      containers:
-        - name: redline-api
-          image: your-registry/redline-api:latest
-          ports:
-            - containerPort: 8080
-          env:
-            - name: RAPIDAPI_PROXY_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: rapidapi-secrets
-                  key: proxy-secret
-          resources:
-            requests:
-              memory: "256Mi"
-              cpu: "250m"
-            limits:
-              memory: "1Gi"
-              cpu: "1000m"
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 30
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 10
-```
+### Deployed Components
+- Health check endpoint: `/health` ✓
+- RapidAPI proxy secret validation ✓
+- Kubernetes secrets configured ✓
 
 ---
 
@@ -695,14 +545,14 @@ paths:
 
 ## CHECKLIST BEFORE PUBLISHING
 
-- [ ] Add health check endpoint to codebase
-- [ ] Add RapidAPI proxy secret validation
-- [ ] Deploy to Kubernetes with proper secrets
-- [ ] Configure Ingress with 50MB body size limit
-- [ ] Configure Ingress with 120s timeout
-- [ ] Test API through RapidAPI gateway
-- [ ] Verify health check is responding
-- [ ] Set up monitoring/alerting for the endpoint
-- [ ] Review and finalize pricing tiers
+- [x] Add health check endpoint to codebase
+- [x] Add RapidAPI proxy secret validation
+- [x] Deploy to Kubernetes with proper secrets
+- [x] Configure Cloudflare Tunnel with domain
+- [x] Test API endpoint (health + redline)
+- [x] Verify health check is responding
+- [ ] Configure RapidAPI Base URL: `https://redline-api.cicero.im`
+- [ ] Configure RapidAPI Health Check URL
+- [ ] Set up pricing tiers
 - [ ] Upload API logo (500x500 PNG/JPEG)
 - [ ] Set visibility to Public after testing
