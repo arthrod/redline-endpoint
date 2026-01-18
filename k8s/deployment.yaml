@@ -15,10 +15,12 @@ spec:
       labels:
         app: redline-api
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: redline-api
-          image: redline-api:latest
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/arthrod/redline-endpoint:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               protocol: TCP
