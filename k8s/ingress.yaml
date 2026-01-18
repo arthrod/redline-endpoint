@@ -17,7 +17,7 @@ spec:
   ingressClassName: nginx
   rules:
     # Replace with your actual domain
-    - host: redline-api.yourdomain.com
+    - host: redline-api.cicero.im
       http:
         paths:
           - path: /
@@ -27,8 +27,8 @@ spec:
                 name: redline-api
                 port:
                   number: 8080
-  # Uncomment and configure for TLS
+  # Uncomment and configure for TLS (not needed with Cloudflare Tunnel)
   # tls:
   #   - hosts:
-  #       - redline-api.yourdomain.com
+  #       - redline-api.cicero.im
   #     secretName: redline-api-tls
