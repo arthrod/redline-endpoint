@@ -7,6 +7,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.Extensions.Logging;
 using System.IO.Compression;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -21,22 +22,11 @@ public class CompareRequest
 
 public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
 {
-    private const int MaxValidationErrorsToLog = 50;
-
     // PowerTools namespace that causes Word warnings
     private static readonly XNamespace Pt14 = "http://powertools.codeplex.com/2011";
     private static readonly XNamespace Rel = "http://schemas.openxmlformats.org/package/2006/relationships";
     private static readonly XNamespace R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
     private static readonly XNamespace W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
-    private static readonly HashSet<string> WordRepairDiffFocusEntries = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "word/document.xml",
-        "word/settings.xml",
-        "word/numbering.xml",
-        "docProps/core.xml",
-        "docProps/app.xml"
-    };
-
     public override void Configure()
     {
         Post("/api/compare");
@@ -78,17 +68,9 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             // Perform comparison
             var result = WmlComparer.Compare(originalDoc, modifiedDoc, settings);
 
-            LogValidationResults("Docxodus raw output", result.DocumentByteArray, Logger);
-            LogPackageIntegrity("Docxodus raw output", result.DocumentByteArray, Logger);
-            TryLogSourceOfTruth(Logger);
-
             // Clean the output to remove PowerTools internal attributes and fix relationships
             var author = req.Author ?? "User";
             var cleanedBytes = CleanDocument(result.DocumentByteArray, author, message => Logger.LogInformation(message));
-
-            LogValidationResults("Cleaned output", cleanedBytes, Logger);
-            LogPackageIntegrity("Cleaned output", cleanedBytes, Logger);
-            TryLogWordRepairDiff(cleanedBytes, Logger);
 
             // Return the redlined document
             await Send.BytesAsync(
@@ -250,9 +232,13 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             xdoc.Save(writer);
         }
 
-        // Get the XML content and fix self-closing tags
+        // Get the XML content and fix self-closing tags (only empty-element tags)
         var xmlContent = encoding.GetString(tempStream.ToArray());
-        xmlContent = xmlContent.Replace(" />", "/>");
+        xmlContent = Regex.Replace(
+            xmlContent,
+            @"<([^>]+?)\s/>",
+            "<$1/>",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         // Write the XML declaration manually with uppercase UTF-8
         var declaration = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n";
@@ -709,788 +695,6 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     }
 
     /// <summary>
-    /// Validates a document and logs any errors found
-    /// </summary>
-    private static void LogValidationResults(string label, byte[] docBytes, ILogger logger)
-    {
-        try
-        {
-            using var stream = new MemoryStream(docBytes);
-            using var doc = WordprocessingDocument.Open(stream, false);
-            var validator = new OpenXmlValidator(FileFormatVersions.Office2021);
-            var errors = validator.Validate(doc).ToList();
-
-            logger.LogInformation("{Label}: Found {Count} validation errors", label, errors.Count);
-            foreach (var error in errors.Take(MaxValidationErrorsToLog))
-            {
-                logger.LogWarning("  - {Description} | Part: {Part} | XPath: {XPath}",
-                    error.Description, error.Part?.Uri, error.Path?.XPath);
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to validate {Label}", label);
-        }
-    }
-
-    /// <summary>
-    /// Attempts to validate the source of truth file for comparison
-    /// </summary>
-    private static void TryLogSourceOfTruth(ILogger logger)
-    {
-        const string sourceOfTruthPath = "/Users/arthrod/temp/Manual Library/temp/redline-endpoint/redline_source_of_truth.docx";
-        if (!File.Exists(sourceOfTruthPath))
-        {
-            logger.LogInformation("Source of truth file not found at {Path}", sourceOfTruthPath);
-            return;
-        }
-
-        try
-        {
-            var bytes = File.ReadAllBytes(sourceOfTruthPath);
-            LogValidationResults("Source of truth", bytes, logger);
-            LogPackageIntegrity("Source of truth", bytes, logger);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to read source of truth");
-        }
-    }
-
-    private static void TryLogWordRepairDiff(byte[] cleanedBytes, ILogger logger)
-    {
-        var repairedPath = FindWordRepairedPath();
-        if (repairedPath == null)
-        {
-            logger.LogInformation("Word-repaired docx not found. Add fixed_redline_by_word.docx to the project root.");
-            return;
-        }
-
-        try
-        {
-            var repairedBytes = File.ReadAllBytes(repairedPath);
-            logger.LogInformation("Comparing cleaned output to Word-repaired docx: {Path}", repairedPath);
-            LogDocxDiff("Cleaned output vs Word repair", cleanedBytes, repairedBytes, logger);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to compare cleaned output to Word-repaired docx");
-        }
-    }
-
-    private static string? FindWordRepairedPath()
-    {
-        var candidates = new[]
-        {
-            "fixed_redline_by_word.docx",
-            "redline_fixed_by_word.docx",
-            "redlined_repaired.docx",
-            "redlined_fixed_by_word.docx"
-        };
-
-        var searchRoots = new[]
-        {
-            Directory.GetCurrentDirectory(),
-            AppContext.BaseDirectory,
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."))
-        };
-
-        foreach (var root in searchRoots.Distinct(StringComparer.OrdinalIgnoreCase))
-        {
-            foreach (var candidate in candidates)
-            {
-                var path = Path.Combine(root, candidate);
-                if (File.Exists(path))
-                    return path;
-            }
-        }
-
-        return null;
-    }
-
-    private static void LogDocxDiff(string label, byte[] leftBytes, byte[] rightBytes, ILogger logger)
-    {
-        using var leftStream = new MemoryStream(leftBytes);
-        using var rightStream = new MemoryStream(rightBytes);
-        using var leftArchive = new ZipArchive(leftStream, ZipArchiveMode.Read, true);
-        using var rightArchive = new ZipArchive(rightStream, ZipArchiveMode.Read, true);
-
-        var leftEntries = leftArchive.Entries
-            .Where(entry => !string.IsNullOrEmpty(entry.FullName))
-            .GroupBy(entry => entry.FullName, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
-
-        var rightEntries = rightArchive.Entries
-            .Where(entry => !string.IsNullOrEmpty(entry.FullName))
-            .GroupBy(entry => entry.FullName, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
-
-        var missingInLeft = rightEntries.Keys.Except(leftEntries.Keys, StringComparer.OrdinalIgnoreCase).ToList();
-        var missingInRight = leftEntries.Keys.Except(rightEntries.Keys, StringComparer.OrdinalIgnoreCase).ToList();
-
-        foreach (var entry in missingInLeft.Take(MaxValidationErrorsToLog))
-        {
-            logger.LogWarning("{Label}: Missing in cleaned output: {Entry}", label, entry);
-        }
-
-        foreach (var entry in missingInRight.Take(MaxValidationErrorsToLog))
-        {
-            logger.LogWarning("{Label}: Missing in Word-repaired output: {Entry}", label, entry);
-        }
-
-        var differences = 0;
-        foreach (var entryName in leftEntries.Keys.Intersect(rightEntries.Keys, StringComparer.OrdinalIgnoreCase))
-        {
-            var leftEntry = leftEntries[entryName];
-            var rightEntry = rightEntries[entryName];
-
-            if (IsXmlEntry(entryName))
-            {
-                var leftDoc = TryLoadXml(leftEntry, logger, label);
-                var rightDoc = TryLoadXml(rightEntry, logger, label);
-
-                if (leftDoc != null && rightDoc != null)
-                {
-                    var leftNormalized = NormalizeXmlForDiff(leftDoc);
-                    var rightNormalized = NormalizeXmlForDiff(rightDoc);
-
-                    if (!XNode.DeepEquals(leftNormalized, rightNormalized))
-                    {
-                        differences++;
-                        logger.LogWarning(
-                            "{Label}: XML differs in {Entry} (Cleaned={LeftSize} bytes, Word={RightSize} bytes)",
-                            label,
-                            entryName,
-                            leftEntry.Length,
-                            rightEntry.Length);
-                        if (ShouldLogXmlDelta(entryName))
-                        {
-                            LogXmlDeltaSummary(label, entryName, leftDoc, rightDoc, logger);
-                        }
-                        if (differences >= MaxValidationErrorsToLog)
-                            break;
-                    }
-
-                    continue;
-                }
-            }
-
-            var leftBytesEntry = ReadEntryBytes(leftEntry);
-            var rightBytesEntry = ReadEntryBytes(rightEntry);
-            if (!leftBytesEntry.SequenceEqual(rightBytesEntry))
-            {
-                differences++;
-                logger.LogWarning(
-                    "{Label}: Binary differs in {Entry} (Cleaned={LeftSize} bytes, Word={RightSize} bytes)",
-                    label,
-                    entryName,
-                    leftBytesEntry.Length,
-                    rightBytesEntry.Length);
-                if (differences >= MaxValidationErrorsToLog)
-                    break;
-            }
-        }
-
-        logger.LogInformation(
-            "{Label}: Word repair diff summary. MissingInCleaned={MissingInCleaned}, MissingInWord={MissingInWord}, ContentDifferences={ContentDifferences}",
-            label,
-            missingInLeft.Count,
-            missingInRight.Count,
-            differences);
-    }
-
-    private static bool IsXmlEntry(string entryName)
-    {
-        return entryName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase) ||
-               entryName.EndsWith(".rels", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static XDocument? TryLoadXml(ZipArchiveEntry entry, ILogger logger, string label)
-    {
-        try
-        {
-            using var stream = entry.Open();
-            return XDocument.Load(stream);
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "{Label}: Failed to load XML entry {Entry}", label, entry.FullName);
-            return null;
-        }
-    }
-
-    private static byte[] ReadEntryBytes(ZipArchiveEntry entry)
-    {
-        using var stream = entry.Open();
-        using var memory = new MemoryStream();
-        stream.CopyTo(memory);
-        return memory.ToArray();
-    }
-
-    private static XDocument NormalizeXmlForDiff(XDocument document)
-    {
-        if (document.Root == null)
-            return document;
-
-        var normalizedRoot = NormalizeXmlElement(document.Root);
-        return new XDocument(document.Declaration, normalizedRoot);
-    }
-
-    private static XElement NormalizeXmlElement(XElement element)
-    {
-        var attributes = element.Attributes()
-            .OrderBy(attribute => attribute.Name.NamespaceName)
-            .ThenBy(attribute => attribute.Name.LocalName)
-            .Select(attribute => new XAttribute(attribute.Name, attribute.Value));
-
-        var nodes = element.Nodes().Select<XNode, XNode>(node => node switch
-        {
-            XElement child => NormalizeXmlElement(child),
-            XCData cdata => new XCData(cdata.Value),
-            XText text => new XText(text.Value),
-            XComment comment => new XComment(comment.Value),
-            XProcessingInstruction pi => new XProcessingInstruction(pi.Target, pi.Data),
-            _ => new XText(node.ToString())
-        });
-
-        return new XElement(element.Name, attributes, nodes);
-    }
-
-    private static bool ShouldLogXmlDelta(string entryName)
-    {
-        return WordRepairDiffFocusEntries.Contains(entryName);
-    }
-
-    private static void LogXmlDeltaSummary(string label, string entryName, XDocument leftDoc, XDocument rightDoc, ILogger logger)
-    {
-        var leftElementCount = leftDoc.Descendants().Count();
-        var rightElementCount = rightDoc.Descendants().Count();
-        var leftAttributeCount = leftDoc.Descendants().SelectMany(element => element.Attributes()).Count();
-        var rightAttributeCount = rightDoc.Descendants().SelectMany(element => element.Attributes()).Count();
-
-        logger.LogInformation(
-            "{Label}: {Entry} counts. Elements: Cleaned={LeftElements}, Word={RightElements}. Attributes: Cleaned={LeftAttributes}, Word={RightAttributes}",
-            label,
-            entryName,
-            leftElementCount,
-            rightElementCount,
-            leftAttributeCount,
-            rightAttributeCount);
-
-        LogCountDeltas(label, entryName, "Element", BuildNameCounts(leftDoc.Descendants().Select(element => element.Name.ToString())), BuildNameCounts(rightDoc.Descendants().Select(element => element.Name.ToString())), logger);
-        LogCountDeltas(label, entryName, "Attribute", BuildNameCounts(leftDoc.Descendants().SelectMany(element => element.Attributes()).Select(attribute => attribute.Name.ToString())), BuildNameCounts(rightDoc.Descendants().SelectMany(element => element.Attributes()).Select(attribute => attribute.Name.ToString())), logger);
-    }
-
-    private static Dictionary<string, int> BuildNameCounts(IEnumerable<string> names)
-    {
-        var counts = new Dictionary<string, int>(StringComparer.Ordinal);
-        foreach (var name in names)
-        {
-            if (counts.TryGetValue(name, out var existing))
-                counts[name] = existing + 1;
-            else
-                counts[name] = 1;
-        }
-
-        return counts;
-    }
-
-    private static void LogCountDeltas(
-        string label,
-        string entryName,
-        string kind,
-        Dictionary<string, int> leftCounts,
-        Dictionary<string, int> rightCounts,
-        ILogger logger)
-    {
-        var differences = leftCounts.Keys
-            .Union(rightCounts.Keys)
-            .Select(name =>
-            {
-                leftCounts.TryGetValue(name, out var left);
-                rightCounts.TryGetValue(name, out var right);
-                return new
-                {
-                    Name = name,
-                    Left = left,
-                    Right = right,
-                    Delta = right - left
-                };
-            })
-            .Where(item => item.Delta != 0)
-            .OrderByDescending(item => Math.Abs(item.Delta))
-            .Take(MaxValidationErrorsToLog)
-            .ToList();
-
-        foreach (var item in differences)
-        {
-            logger.LogWarning(
-                "{Label}: {Entry} {Kind} delta {Name} (Cleaned={Left}, Word={Right}, Delta={Delta})",
-                label,
-                entryName,
-                kind,
-                item.Name,
-                item.Left,
-                item.Right,
-                item.Delta);
-        }
-    }
-
-    private static void LogPackageIntegrity(string label, byte[] docBytes, ILogger logger)
-    {
-        try
-        {
-            using var stream = new MemoryStream(docBytes);
-            using var archive = new ZipArchive(stream, ZipArchiveMode.Read, true);
-
-            var entries = archive.Entries
-                .Where(entry => !string.IsNullOrEmpty(entry.FullName))
-                .ToList();
-            var entryNames = entries.Select(entry => entry.FullName).ToList();
-            var entrySet = new HashSet<string>(entryNames, StringComparer.OrdinalIgnoreCase);
-
-            var duplicateIssues = LogDuplicateEntries(label, entryNames, logger);
-            var contentTypeIssues = LogContentTypeIssues(label, entries, entrySet, logger);
-            var relIssues = 0;
-            var relCount = 0;
-
-            foreach (var relEntry in entries.Where(entry => entry.FullName.EndsWith(".rels", StringComparison.OrdinalIgnoreCase)))
-            {
-                relCount++;
-                using var relStream = relEntry.Open();
-                var relsDoc = XDocument.Load(relStream);
-                relIssues += LogRelationshipIssues(label, relsDoc, relEntry.FullName, entrySet, logger);
-            }
-
-            var relReferenceIssues = LogRelationshipReferenceIssues(label, entries, logger);
-            var noteReferenceIssues = LogNoteReferenceIssues(label, entries, logger);
-
-            logger.LogInformation(
-                "{Label}: Package integrity summary. Entries={EntryCount}, Relationships={RelCount}, DuplicateIssues={DuplicateIssues}, ContentTypeIssues={ContentTypeIssues}, RelationshipIssues={RelIssues}, RelationshipReferenceIssues={RelReferenceIssues}, NoteReferenceIssues={NoteReferenceIssues}",
-                label,
-                entries.Count,
-                relCount,
-                duplicateIssues,
-                contentTypeIssues,
-                relIssues,
-                relReferenceIssues,
-                noteReferenceIssues);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed package integrity check for {Label}", label);
-        }
-    }
-
-    private static int LogDuplicateEntries(string label, List<string> entryNames, ILogger logger)
-    {
-        var issues = 0;
-        var exactDuplicates = entryNames
-            .GroupBy(name => name)
-            .Where(group => group.Count() > 1)
-            .ToList();
-
-        foreach (var group in exactDuplicates.Take(MaxValidationErrorsToLog))
-        {
-            issues++;
-            logger.LogWarning("{Label}: Duplicate zip entry {Entry} (x{Count})", label, group.Key, group.Count());
-        }
-
-        var caseInsensitiveDuplicates = entryNames
-            .GroupBy(name => name, StringComparer.OrdinalIgnoreCase)
-            .Where(group => group.Count() > 1)
-            .Where(group => group.Distinct(StringComparer.Ordinal).Count() > 1)
-            .ToList();
-
-        foreach (var group in caseInsensitiveDuplicates.Take(MaxValidationErrorsToLog))
-        {
-            var variants = string.Join(", ", group.Distinct(StringComparer.Ordinal));
-            logger.LogWarning(
-                "{Label}: Case-colliding zip entries ({Count}) for {Entry}: {Variants}",
-                label,
-                group.Count(),
-                group.Key,
-                variants);
-            issues++;
-        }
-
-        return issues;
-    }
-
-    private static int LogRelationshipReferenceIssues(string label, List<ZipArchiveEntry> entries, ILogger logger)
-    {
-        var issues = 0;
-        var relsIdMap = BuildRelationshipIdMap(entries);
-        var relAttributeNames = new HashSet<string>(new[] { "id", "embed", "link" }, StringComparer.OrdinalIgnoreCase);
-
-        foreach (var contentEntry in entries.Where(entry => IsContentPartWithRelationships(entry.FullName)))
-        {
-            using var contentStream = contentEntry.Open();
-            var contentDoc = XDocument.Load(contentStream);
-
-            var relsPath = GetRelsPathForContentPart(contentEntry.FullName);
-            relsIdMap.TryGetValue(relsPath, out var relIds);
-
-            var relAttrs = contentDoc.Descendants()
-                .SelectMany(element => element.Attributes())
-                .Where(attr => attr.Name.Namespace == R && relAttributeNames.Contains(attr.Name.LocalName))
-                .ToList();
-
-            if (relAttrs.Count == 0)
-                continue;
-
-            if (relIds == null)
-            {
-                issues++;
-                logger.LogWarning(
-                    "{Label}: Missing .rels file for {Part} but found relationship references (expected {RelsPath})",
-                    label,
-                    contentEntry.FullName,
-                    relsPath);
-                if (issues >= MaxValidationErrorsToLog)
-                    break;
-                continue;
-            }
-
-            foreach (var attr in relAttrs)
-            {
-                if (!relIds.Contains(attr.Value))
-                {
-                    issues++;
-                    logger.LogWarning(
-                        "{Label}: Missing relationship Id {Id} referenced in {Part} (rels: {RelsPath})",
-                        label,
-                        attr.Value,
-                        contentEntry.FullName,
-                        relsPath);
-                    if (issues >= MaxValidationErrorsToLog)
-                        return issues;
-                }
-            }
-        }
-
-        return issues;
-    }
-
-    private static Dictionary<string, HashSet<string>> BuildRelationshipIdMap(List<ZipArchiveEntry> entries)
-    {
-        var map = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var relEntry in entries.Where(entry => entry.FullName.EndsWith(".rels", StringComparison.OrdinalIgnoreCase)))
-        {
-            using var relStream = relEntry.Open();
-            var relsDoc = XDocument.Load(relStream);
-            var ids = relsDoc.Root?
-                .Elements(Rel + "Relationship")
-                .Select(rel => rel.Attribute("Id")?.Value)
-                .Where(id => !string.IsNullOrWhiteSpace(id))
-                .ToHashSet(StringComparer.OrdinalIgnoreCase)
-                ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            map[relEntry.FullName] = ids;
-        }
-
-        return map;
-    }
-
-    private static int LogNoteReferenceIssues(string label, List<ZipArchiveEntry> entries, ILogger logger)
-    {
-        var issues = 0;
-        var footnoteIds = LoadNoteIds(entries, "word/footnotes.xml", W + "footnote");
-        var endnoteIds = LoadNoteIds(entries, "word/endnotes.xml", W + "endnote");
-        var commentIds = LoadNoteIds(entries, "word/comments.xml", W + "comment");
-
-        foreach (var contentEntry in entries.Where(entry => IsContentPartWithRelationships(entry.FullName)))
-        {
-            using var contentStream = contentEntry.Open();
-            var contentDoc = XDocument.Load(contentStream);
-
-            issues += LogMissingNoteReferences(label, contentEntry.FullName, contentDoc, W + "footnoteReference", footnoteIds, logger);
-            if (issues >= MaxValidationErrorsToLog)
-                return issues;
-
-            issues += LogMissingNoteReferences(label, contentEntry.FullName, contentDoc, W + "endnoteReference", endnoteIds, logger);
-            if (issues >= MaxValidationErrorsToLog)
-                return issues;
-
-            issues += LogMissingNoteReferences(label, contentEntry.FullName, contentDoc, W + "commentReference", commentIds, logger);
-            if (issues >= MaxValidationErrorsToLog)
-                return issues;
-
-            issues += LogMissingNoteReferences(label, contentEntry.FullName, contentDoc, W + "commentRangeStart", commentIds, logger);
-            if (issues >= MaxValidationErrorsToLog)
-                return issues;
-
-            issues += LogMissingNoteReferences(label, contentEntry.FullName, contentDoc, W + "commentRangeEnd", commentIds, logger);
-            if (issues >= MaxValidationErrorsToLog)
-                return issues;
-        }
-
-        return issues;
-    }
-
-    private static HashSet<string> LoadNoteIds(List<ZipArchiveEntry> entries, string partName, XName elementName)
-    {
-        var entry = entries.FirstOrDefault(candidate =>
-            string.Equals(candidate.FullName, partName, StringComparison.OrdinalIgnoreCase));
-
-        if (entry == null)
-            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        using var stream = entry.Open();
-        var doc = XDocument.Load(stream);
-
-        return doc.Descendants(elementName)
-            .Select(element => element.Attribute(W + "id")?.Value)
-            .Where(id => !string.IsNullOrWhiteSpace(id))
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-    }
-
-    private static int LogMissingNoteReferences(
-        string label,
-        string partName,
-        XDocument contentDoc,
-        XName referenceElement,
-        HashSet<string> knownIds,
-        ILogger logger)
-    {
-        var issues = 0;
-        var references = contentDoc.Descendants(referenceElement)
-            .Select(element => element.Attribute(W + "id")?.Value)
-            .Where(id => !string.IsNullOrWhiteSpace(id));
-
-        foreach (var id in references)
-        {
-            if (!knownIds.Contains(id!))
-            {
-                issues++;
-                logger.LogWarning(
-                    "{Label}: Missing {ReferenceType} id {Id} referenced in {Part}",
-                    label,
-                    referenceElement.LocalName,
-                    id,
-                    partName);
-                if (issues >= MaxValidationErrorsToLog)
-                    return issues;
-            }
-        }
-
-        return issues;
-    }
-
-    private static int LogContentTypeIssues(
-        string label,
-        List<ZipArchiveEntry> entries,
-        HashSet<string> entrySet,
-        ILogger logger)
-    {
-        var issues = 0;
-        var contentTypesEntry = entries.FirstOrDefault(entry => entry.FullName == "[Content_Types].xml");
-        if (contentTypesEntry == null)
-        {
-            logger.LogWarning("{Label}: Missing [Content_Types].xml", label);
-            return ++issues;
-        }
-
-        using var contentTypesStream = contentTypesEntry.Open();
-        var contentTypesDoc = XDocument.Load(contentTypesStream);
-        var root = contentTypesDoc.Root;
-        if (root == null)
-        {
-            logger.LogWarning("{Label}: [Content_Types].xml has no root", label);
-            return ++issues;
-        }
-
-        var ns = root.Name.Namespace;
-        var overrides = root.Elements(ns + "Override")
-            .Select(element => element.Attribute("PartName")?.Value)
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .Select(value => value!.Trim())
-            .ToList();
-
-        var defaults = root.Elements(ns + "Default")
-            .Select(element => element.Attribute("Extension")?.Value)
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .Select(value => value!.Trim())
-            .ToList();
-
-        var duplicateOverrides = overrides
-            .GroupBy(value => value, StringComparer.OrdinalIgnoreCase)
-            .Where(group => group.Count() > 1)
-            .ToList();
-
-        foreach (var group in duplicateOverrides.Take(MaxValidationErrorsToLog))
-        {
-            logger.LogWarning("{Label}: Duplicate content type override for {Part} (x{Count})", label, group.Key, group.Count());
-            issues++;
-        }
-
-        var duplicateDefaults = defaults
-            .GroupBy(value => value, StringComparer.OrdinalIgnoreCase)
-            .Where(group => group.Count() > 1)
-            .ToList();
-
-        foreach (var group in duplicateDefaults.Take(MaxValidationErrorsToLog))
-        {
-            logger.LogWarning("{Label}: Duplicate content type default for extension {Extension} (x{Count})", label, group.Key, group.Count());
-            issues++;
-        }
-
-        var overrideParts = overrides
-            .Select(value => value.TrimStart('/'))
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var defaultExtensions = defaults
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        var missingOverrideParts = overrides
-            .Select(value => value.TrimStart('/'))
-            .Where(part => !entrySet.Contains(part))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        foreach (var part in missingOverrideParts.Take(MaxValidationErrorsToLog))
-        {
-            logger.LogWarning("{Label}: Content type override references missing part {Part}", label, part);
-            issues++;
-        }
-
-        var entriesMissingContentTypes = entries
-            .Select(entry => entry.FullName)
-            .Where(name => name != "[Content_Types].xml")
-            .Where(name => !overrideParts.Contains(name))
-            .Where(name =>
-            {
-                var extension = Path.GetExtension(name).TrimStart('.');
-                return string.IsNullOrEmpty(extension) || !defaultExtensions.Contains(extension);
-            })
-            .ToList();
-
-        foreach (var part in entriesMissingContentTypes.Take(MaxValidationErrorsToLog))
-        {
-            logger.LogWarning("{Label}: Missing content type for part {Part}", label, part);
-            issues++;
-        }
-
-        return issues;
-    }
-
-    private static int LogRelationshipIssues(
-        string label,
-        XDocument relsDoc,
-        string relsPath,
-        HashSet<string> entrySet,
-        ILogger logger)
-    {
-        var issues = 0;
-        if (relsDoc.Root == null)
-        {
-            logger.LogWarning("{Label}: Relationships file {RelsPath} has no root", label, relsPath);
-            return ++issues;
-        }
-
-        var baseFolder = GetBaseFolderForRelsFile(relsPath);
-        var relationships = relsDoc.Root.Elements(Rel + "Relationship").ToList();
-
-        var duplicateIds = relationships
-            .Select(rel => rel.Attribute("Id")?.Value)
-            .Where(id => !string.IsNullOrWhiteSpace(id))
-            .GroupBy(id => id!, StringComparer.OrdinalIgnoreCase)
-            .Where(group => group.Count() > 1)
-            .ToList();
-
-        foreach (var group in duplicateIds.Take(MaxValidationErrorsToLog))
-        {
-            logger.LogWarning(
-                "{Label}: Duplicate relationship Id {Id} (x{Count}) in {RelsPath}",
-                label,
-                group.Key,
-                group.Count(),
-                relsPath);
-            issues++;
-        }
-
-        var issueCount = 0;
-        foreach (var rel in relationships)
-        {
-            var targetAttr = rel.Attribute("Target");
-            if (targetAttr == null || string.IsNullOrWhiteSpace(targetAttr.Value))
-            {
-                logger.LogWarning("{Label}: Empty relationship target in {RelsPath}", label, relsPath);
-                issues++;
-                if (++issueCount >= MaxValidationErrorsToLog)
-                    break;
-                continue;
-            }
-
-            var targetMode = rel.Attribute("TargetMode")?.Value;
-            if (string.Equals(targetMode, "External", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            var resolvedTarget = ResolveTargetPath(targetAttr.Value, baseFolder, out var escapedRoot);
-            if (escapedRoot)
-            {
-                logger.LogWarning(
-                    "{Label}: Relationship target escapes package root in {RelsPath}: {Target}",
-                    label,
-                    relsPath,
-                    targetAttr.Value);
-                issues++;
-                if (++issueCount >= MaxValidationErrorsToLog)
-                    break;
-            }
-
-            if (string.IsNullOrWhiteSpace(resolvedTarget) || !entrySet.Contains(resolvedTarget))
-            {
-                logger.LogWarning(
-                    "{Label}: Missing relationship target in {RelsPath}: {Target} -> {Resolved}",
-                    label,
-                    relsPath,
-                    targetAttr.Value,
-                    resolvedTarget);
-                issues++;
-                if (++issueCount >= MaxValidationErrorsToLog)
-                    break;
-            }
-        }
-
-        return issues;
-    }
-
-    private static string ResolveTargetPath(string target, string baseFolder, out bool escapedRoot)
-    {
-        escapedRoot = false;
-        var normalizedTarget = target.Replace('\\', '/');
-
-        string combined;
-        if (normalizedTarget.StartsWith("/"))
-            combined = normalizedTarget.TrimStart('/');
-        else if (string.IsNullOrEmpty(baseFolder))
-            combined = normalizedTarget;
-        else
-            combined = baseFolder + normalizedTarget;
-
-        var segments = new List<string>();
-        foreach (var segment in combined.Split('/', StringSplitOptions.RemoveEmptyEntries))
-        {
-            if (segment == ".")
-                continue;
-
-            if (segment == "..")
-            {
-                if (segments.Count == 0)
-                    escapedRoot = true;
-                else
-                    segments.RemoveAt(segments.Count - 1);
-                continue;
-            }
-
-            segments.Add(segment);
-        }
-
-        return string.Join("/", segments);
-    }
-
-    /// <summary>
     /// Fixes Word invariants that aren't covered by OpenXmlValidator but cause "unreadable content" warnings
     /// </summary>
     private static void FixWordInvariants(WordprocessingDocument doc, string author, Action<string>? log)
@@ -1706,12 +910,11 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     /// </summary>
     private static string GenerateUniqueRsid(HashSet<string> existingRsids)
     {
-        var random = new Random();
         string candidate;
         do
         {
             // Generate in Word's typical range: 00010000 to 00FFFFFF
-            var value = random.Next(0x00010000, 0x00FFFFFF);
+            var value = Random.Shared.Next(0x00010000, 0x00FFFFFF);
             candidate = value.ToString("X8");
         } while (existingRsids.Contains(candidate));
 
@@ -1793,6 +996,58 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
                 }
 
                 moveTo.InsertAfterSelf(ins);
+                moveTo.Remove();
+                totalConverted++;
+            }
+
+            // Convert block-level MoveFrom to DeletedParagraph tracking
+            foreach (var moveFrom in root.Descendants<MoveFrom>().ToList())
+            {
+                var author = moveFrom.Author?.Value;
+                var date = moveFrom.Date?.Value;
+                var id = moveFrom.Id?.Value;
+
+                // Wrap each Run inside in DeletedRun
+                foreach (var run in moveFrom.Descendants<Run>().ToList())
+                {
+                    var del = new DeletedRun { Author = author, Date = date, Id = id };
+                    run.InsertAfterSelf(del);
+                    run.Remove();
+                    del.AppendChild(run);
+                }
+
+                // Unwrap the MoveFrom - move its children up and remove container
+                foreach (var child in moveFrom.ChildElements.ToList())
+                {
+                    child.Remove();
+                    moveFrom.InsertBeforeSelf(child);
+                }
+                moveFrom.Remove();
+                totalConverted++;
+            }
+
+            // Convert block-level MoveTo to InsertedParagraph tracking
+            foreach (var moveTo in root.Descendants<MoveTo>().ToList())
+            {
+                var author = moveTo.Author?.Value;
+                var date = moveTo.Date?.Value;
+                var id = moveTo.Id?.Value;
+
+                // Wrap each Run inside in InsertedRun
+                foreach (var run in moveTo.Descendants<Run>().ToList())
+                {
+                    var ins = new InsertedRun { Author = author, Date = date, Id = id };
+                    run.InsertAfterSelf(ins);
+                    run.Remove();
+                    ins.AppendChild(run);
+                }
+
+                // Unwrap the MoveTo - move its children up and remove container
+                foreach (var child in moveTo.ChildElements.ToList())
+                {
+                    child.Remove();
+                    moveTo.InsertBeforeSelf(child);
+                }
                 moveTo.Remove();
                 totalConverted++;
             }
