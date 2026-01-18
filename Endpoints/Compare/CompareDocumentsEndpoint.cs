@@ -71,7 +71,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             // Configure comparison settings
             var settings = new WmlComparerSettings
             {
-                AuthorForRevisions = req.Author ?? "Redline API",
+                AuthorForRevisions = req.Author ?? "User",
                 DetailThreshold = 0
             };
 
@@ -83,7 +83,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             TryLogSourceOfTruth(Logger);
 
             // Clean the output to remove PowerTools internal attributes and fix relationships
-            var author = req.Author ?? "Redline API";
+            var author = req.Author ?? "User";
             var cleanedBytes = CleanDocument(result.DocumentByteArray, author, message => Logger.LogInformation(message));
 
             LogValidationResults("Cleaned output", cleanedBytes, Logger);
