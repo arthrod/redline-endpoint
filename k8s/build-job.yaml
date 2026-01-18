@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kaniko-build
+  namespace: redline-api
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: git-clone
+          image: alpine/git:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cp /git-secret/.gitconfig /root/.gitconfig
+              cp /git-secret/.git-credentials /root/.git-credentials
+              chmod 600 /root/.git-credentials
+              git clone https://github.com/arthrod/redline-endpoint.git /workspace
+              ls -la /workspace
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+            - name: git-creds
+              mountPath: /git-secret
+              readOnly: true
+      containers:
+        - name: kaniko
+          image: gcr.io/kaniko-project/executor:latest
+          args:
+            - "--dockerfile=Dockerfile"
+            - "--context=/workspace"
+            - "--destination=ghcr.io/arthrod/redline-endpoint:latest"
+            - "--cache=false"
+          volumeMounts:
+            - name: docker-config
+              mountPath: /kaniko/.docker
+            - name: workspace
+              mountPath: /workspace
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+      volumes:
+        - name: docker-config
+          secret:
+            secretName: github-creds
+            items:
+              - key: .dockerconfigjson
+                path: config.json
+        - name: git-creds
+          secret:
+            secretName: git-creds
+        - name: workspace
+          emptyDir: {}

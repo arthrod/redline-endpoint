@@ -43,7 +43,7 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             var proxySecret = HttpContext.Request.Headers["X-RapidAPI-Proxy-Secret"].FirstOrDefault();
             if (proxySecret != expectedSecret)
             {
-                await SendUnauthorizedAsync(ct);
+                await SendAsync(new { message = "Unauthorized" }, 401, ct);
                 return;
             }
         }
