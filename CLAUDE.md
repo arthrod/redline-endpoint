@@ -1,61 +1,40 @@
-# Redline API
+# Redline API - Development Guide
 
-A FastEndpoints-based .NET API that compares two DOCX documents and returns a redlined document with tracked changes.
+Document comparison API using .NET 10 + FastEndpoints + Docxodus.
 
-## Tech Stack
-
-- **.NET 10** with FastEndpoints 7.x
-- **Docxodus** (WmlComparer) for document comparison
-- **DocumentFormat.OpenXml** for document manipulation
-- JWT Bearer authentication (configured but currently `AllowAnonymous`)
-
-## Running Locally
+## Quick Reference
 
 ```bash
-dotnet run --urls "http://localhost:5000"
-```
+# Run locally
+dotnet run
 
-## API Usage
-
-```bash
-curl -X POST http://localhost:5000/api/compare \
+# Test endpoint
+curl -X POST http://localhost:5003/api/compare \
   -F "Original=@original.docx" \
   -F "Modified=@modified.docx" \
-  -F "Author=Your Name" \
   --output redlined.docx
-```
 
-## Docker
-
-```bash
+# Build Docker
 docker build -t redline-api .
-docker run -p 8080:8080 -e Jwt__Secret="your-secret-key" redline-api
+docker run -p 8080:8080 redline-api
 ```
 
-## Known Issues
+## Architecture
 
-The Docxodus/WmlComparer library produces output that causes Word to show "unreadable content" warnings. The `CleanDocument` method in `CompareDocumentsEndpoint.cs` attempts to fix these issues by:
+- **Single endpoint**: `POST /api/compare` - accepts two DOCX files, returns redlined document
+- **Core logic**: `Endpoints/Compare/CompareDocumentsEndpoint.cs`
+- **Comparison engine**: Docxodus WmlComparer
+- **Post-processing**: `CleanDocument()` fixes OOXML compatibility issues
 
-1. Removing `pt14:` PowerTools namespace and attributes
-2. Fixing GUID-style relationship IDs (e.g., `R76e2e2db...` → `rId8`)
-3. Converting absolute paths to relative paths (`/word/footnotes.xml` → `footnotes.xml`)
+## Key Implementation Details
 
-See `attempted_methods.md` for debugging history.
+The Docxodus library output requires post-processing for Word compatibility:
 
-## Project Structure
+1. **Move operations** → Converted to del/ins (moves are fragile in OOXML)
+2. **PowerTools namespace** → Removed (pt14: attributes cause warnings)
+3. **Relationship IDs** → Normalized from GUIDs to rId format
+4. **Paths** → Converted from absolute to relative
 
-```
-├── Program.cs                           # FastEndpoints + JWT setup
-├── Endpoints/Compare/
-│   └── CompareDocumentsEndpoint.cs      # Main comparison endpoint
-├── appsettings.json                     # Configuration
-├── Dockerfile                           # Docker deployment
-├── original.docx                        # Test file
-└── modified.docx                        # Test file
-```
+## Testing
 
-## Enabling Authentication
-
-1. Remove `AllowAnonymous()` from `CompareDocumentsEndpoint.cs`
-2. Update `Jwt:Secret` in `appsettings.json`
-3. Include `Authorization: Bearer <token>` header in requests
+Sample files `original.docx` and `modified.docx` are included for testing.
