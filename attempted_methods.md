@@ -646,6 +646,162 @@ When removing a whole paragraph and merging content, the remaining portion is ma
 
 ---
 
+## Attempt 26: Move Range ID Pairing Fix (2026-01-17)
+
+**Branch:** `attempting-to-fix-moving`
+
+**Theory:** Instead of converting moves to del/ins, try to FIX the move operations by:
+1. Deduplicating move operations (keep only one pair per move name)
+2. Ensuring RangeEnd IDs match their corresponding RangeStart IDs (per ISO 29500)
+
+**What we tried:**
+- Replaced `ConvertMoveOperationsToDelIns()` with `DeduplicateMoveOperations()`
+- Added `EnsureMoveRangeStartEndIdsMatch()` to fix ID pairing
+- Updated `EnsureUniqueRevisionIds()` to NOT treat RangeEnd IDs as duplicates (since they MUST match RangeStart)
+
+**Code:**
+```csharp
+private static void FixWordInvariants(...)
+{
+    DeduplicateMoveOperations(doc, log);  // Remove duplicate move operations
+    EnsureParagraphIds(doc, log);
+    NormalizeTrackedChangeDates(doc, log);
+    EnsureTableCellsHaveAtLeastOneParagraph(doc, log);
+    EnsureCommentPartsExistIfReferenced(doc, author, log);
+    EnsureUniqueRevisionIds(doc, log);
+    EnsureMoveRangeStartEndIdsMatch(doc, log);  // NEW: enforce ISO rule
+    EnsureSectionPropertiesHaveRsid(doc, log);
+}
+```
+
+**Observations from unpacked document:**
+- Move range IDs correctly paired (52↔52, 53↔53, 54↔54, 47↔47) ✅
+- No pt14/powertools artifacts ✅
+- BUT: `moveFrom` elements contain `w:delText` instead of `w:t`:
+```xml
+<w:moveFrom ...>
+  <w:r>
+    <w:delText>, PRAZO E EXERCÍCIO SOCIAL</w:delText>  <!-- Should be w:t? -->
+  </w:r>
+</w:moveFrom>
+```
+
+**Test file:** `diagnosis/unpacked-docx/`
+
+**Result:** ❌ Still showed warning. Move ID pairing is NOT the sole cause.
+
+---
+
+## Attempt 27: Remove rsid from settings.xml (2026-01-17)
+
+**What we tried:**
+- Removed specific rsid entry from settings.xml: `<w:rsid w:val="004F58A5"/>`
+- Rebuilt docx package
+
+**Test file:** `diagnosis/test-no-rsid.docx`
+
+**Result:** ❌ Still showed warning. rsid entries are NOT the cause.
+
+---
+
+## Attempt 28: Convert delText to t inside moveFrom (2026-01-17)
+
+**Discovery:** Docxodus generates `w:delText` inside `w:moveFrom` elements, but `w:t` inside `w:moveTo`:
+```xml
+<!-- moveFrom uses delText (possibly wrong) -->
+<w:moveFrom ...>
+  <w:r>
+    <w:delText>, PRAZO E EXERCÍCIO SOCIAL</w:delText>
+  </w:r>
+</w:moveFrom>
+
+<!-- moveTo uses regular t -->
+<w:moveTo ...>
+  <w:r>
+    <w:t>obse, PRAZO E EXERCÍCIO SOCIAL</w:t>
+  </w:r>
+</w:moveTo>
+```
+
+**What we tried:**
+- Copied unpacked folder
+- Used Python regex to replace `w:delText` → `w:t` only inside `w:moveFrom` elements
+- Preserved `w:delText` inside `w:del` elements (which is correct usage)
+
+**Test file:** `diagnosis/test-deltext-fix.docx`
+
+**Result:** ❌ Still showed warning. delText inside moveFrom is NOT the cause.
+
+---
+
+## Attempt 29: RenumberAllRevisions - Sequential ID Renumbering (2026-01-17)
+
+**What we tried:**
+- Created `RenumberAllRevisions()` method that renumbers ALL revision IDs sequentially (1, 2, 3...)
+- Maps Move RangeStart IDs to new IDs, then updates RangeEnd IDs to match
+- Guarantees zero ID collisions
+
+**Code:**
+```csharp
+private static void RenumberAllRevisions(WordprocessingDocument doc, Action<string>? log)
+{
+    // 1. Map current Move IDs to New IDs to preserve Start/End links
+    var moveIdMap = new Dictionary<string, string>();
+
+    // Find all revision elements in document order
+    var allRevisions = root.Descendants().Where(e =>
+        e is DeletedRun || e is InsertedRun || e is Deleted || e is Inserted ||
+        e is MoveFromRun || e is MoveToRun ||
+        e is MoveFromRangeStart || e is MoveToRangeStart
+    ).ToList();
+
+    // Assign sequential IDs, mapping old Move IDs to new ones
+    foreach (var el in allRevisions) { ... }
+
+    // 2. Fix Move Range ENDs using the map
+    foreach (var endEl in rangeEnds) { ... }
+}
+```
+
+**Test file:** `/tmp/redlined-renumber.docx`
+
+**Result:** ❌ Still showed warning. Sequential renumbering alone doesn't fix the issue.
+
+---
+
+## Attempt 30: ConvertMovesToDelIns + RenumberAllRevisions (2026-01-17)
+
+**What we tried:**
+- Added `ConvertMovesToDelIns()` before `RenumberAllRevisions()`
+- Converts MoveFromRun → DeletedRun using `InnerXml`
+- Converts MoveToRun → InsertedRun using `InnerXml`
+- Removes all Range markers (Start/End)
+
+**Code:**
+```csharp
+private static void ConvertMovesToDelIns(WordprocessingDocument doc, Action<string>? log)
+{
+    // 1. Convert Inline MoveFrom -> DeletedRun
+    foreach (var mf in root.Descendants<MoveFromRun>().ToList())
+    {
+        var del = new DeletedRun { Id = mf.Id, Author = mf.Author, Date = mf.Date };
+        del.InnerXml = mf.InnerXml; // Move contents
+        mf.Parent?.InsertAfter(del, mf);
+        mf.Remove();
+    }
+    // ... similar for MoveTo -> InsertedRun
+    // ... remove all Range markers
+}
+```
+
+**Test file:** `/tmp/redlined-convert-renumber.docx`
+
+**Result:** ❌ Document opened but TEXT WAS MISSING. The `InnerXml` approach loses content.
+
+**Issue:** Using `InnerXml` to copy content doesn't work correctly - text disappears.
+
+---
+
 ## References
 
 - [Docxodus GitHub](https://github.com/JSv4/Docxodus)

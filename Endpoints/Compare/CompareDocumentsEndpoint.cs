@@ -1495,19 +1495,25 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     /// </summary>
     private static void FixWordInvariants(WordprocessingDocument doc, string author, Action<string>? log)
     {
-        ConvertMoveOperationsToDelIns(doc, log);  // Convert fragile moves to simpler del/ins
+        DeduplicateMoveOperations(doc, log);  // Remove duplicate move operations
         EnsureParagraphIds(doc, log);
         NormalizeTrackedChangeDates(doc, log);
         EnsureTableCellsHaveAtLeastOneParagraph(doc, log);
         EnsureCommentPartsExistIfReferenced(doc, author, log);
-        EnsureUniqueRevisionIds(doc, log);
+
+        // Convert fragile Move operations to robust Del/Ins
+        ConvertMovesToDelIns(doc, log);
+
+        // Completely renumber all revision IDs sequentially to guarantee uniqueness
+        RenumberAllRevisions(doc, log);
+
         EnsureSectionPropertiesHaveRsid(doc, log);
     }
 
     /// <summary>
-    /// Ensures all revision w:id attributes are unique across the document.
-    /// According to ECMA-376, w:id on revision elements must be unique within document.xml.
-    /// Docxodus sometimes generates duplicate IDs (e.g., w:moveFrom and w:del both with id="21").
+    /// Ensures revision IDs are unique.
+    /// FIX: Preserves shared IDs for Move operations (moveFrom/moveTo) so links aren't broken.
+    /// Reassigns w:ins/w:del IDs if they conflict with Move IDs or each other.
     /// </summary>
     private static void EnsureUniqueRevisionIds(WordprocessingDocument doc, Action<string>? log)
     {
@@ -1518,63 +1524,259 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
 
         foreach (var root in EnumerateStoryRoots(main))
         {
-            // Collect all revision elements with w:id attributes
-            var revisionElements = new List<OpenXmlElement>();
+            // 1. Collect all Move elements. These MUST share IDs to work.
+            // We treat the set of IDs used by moves as "reserved".
+            var moveElements = new List<OpenXmlElement>();
+            moveElements.AddRange(root.Descendants<MoveFromRun>());
+            moveElements.AddRange(root.Descendants<MoveToRun>());
+            moveElements.AddRange(root.Descendants<MoveFromRangeStart>());
+            moveElements.AddRange(root.Descendants<MoveToRangeStart>());
+            // Note: We ignore RangeEnds for ID collection as they just follow their Start.
 
-            revisionElements.AddRange(root.Descendants<DeletedRun>());
-            revisionElements.AddRange(root.Descendants<InsertedRun>());
-            revisionElements.AddRange(root.Descendants<Deleted>());
-            revisionElements.AddRange(root.Descendants<Inserted>());
-            revisionElements.AddRange(root.Descendants<MoveFromRun>());
-            revisionElements.AddRange(root.Descendants<MoveToRun>());
-            revisionElements.AddRange(root.Descendants<MoveFromRangeStart>());
-            revisionElements.AddRange(root.Descendants<MoveFromRangeEnd>());
-            revisionElements.AddRange(root.Descendants<MoveToRangeStart>());
-            revisionElements.AddRange(root.Descendants<MoveToRangeEnd>());
-
-            // Track used IDs and find duplicates
-            var usedIds = new HashSet<string>(StringComparer.Ordinal);
-            var elementsToReassign = new List<OpenXmlElement>();
+            var moveIds = new HashSet<string>(StringComparer.Ordinal);
             var maxId = 0;
 
-            foreach (var element in revisionElements)
+            foreach (var el in moveElements)
             {
-                var idValue = GetRevisionId(element);
-                if (idValue == null) continue;
+                var id = GetRevisionId(el);
+                if (string.IsNullOrEmpty(id)) continue;
 
-                if (int.TryParse(idValue, out var numericId))
-                {
-                    maxId = Math.Max(maxId, numericId);
-                }
+                moveIds.Add(id);
+                if (int.TryParse(id, out var num)) maxId = Math.Max(maxId, num);
+            }
 
-                if (usedIds.Contains(idValue))
+            // 2. Collect simple revisions (ins/del).
+            // These can be safely reassigned without breaking links.
+            var simpleRevisions = new List<OpenXmlElement>();
+            simpleRevisions.AddRange(root.Descendants<DeletedRun>()); // w:del
+            simpleRevisions.AddRange(root.Descendants<InsertedRun>()); // w:ins
+            simpleRevisions.AddRange(root.Descendants<Deleted>()); // w:del (block)
+            simpleRevisions.AddRange(root.Descendants<Inserted>()); // w:ins (formatting)
+
+            // 3. Detect conflicts and reassign simple revisions
+            var usedIds = new HashSet<string>(moveIds, StringComparer.Ordinal);
+            var nextId = maxId + 1;
+
+            foreach (var el in simpleRevisions)
+            {
+                var id = GetRevisionId(el);
+
+                // If ID is missing, or is already used by a Move, or already used by another simple revision
+                if (string.IsNullOrEmpty(id) || usedIds.Contains(id))
                 {
-                    // Duplicate found - mark for reassignment
-                    elementsToReassign.Add(element);
+                    // Conflict! Reassign to a new unique ID
+                    var newIdStr = nextId.ToString();
+                    SetRevisionId(el, newIdStr);
+
+                    usedIds.Add(newIdStr);
+                    nextId++;
+                    totalReassigned++;
                 }
                 else
                 {
-                    usedIds.Add(idValue);
+                    // No conflict, register this ID as used
+                    usedIds.Add(id);
+                    if (int.TryParse(id, out var num)) nextId = Math.Max(nextId, num + 1);
                 }
             }
 
-            // Reassign duplicate IDs
-            var nextId = maxId + 1;
-            foreach (var element in elementsToReassign)
-            {
-                var newId = nextId.ToString();
-                SetRevisionId(element, newId);
-                usedIds.Add(newId);
-                nextId++;
-                totalReassigned++;
-            }
-
-            if (elementsToReassign.Count > 0)
+            if (totalReassigned > 0)
                 root.Save();
         }
 
         if (totalReassigned > 0)
-            log?.Invoke($"Reassigned {totalReassigned} duplicate revision IDs to ensure uniqueness.");
+            log?.Invoke($"Reassigned {totalReassigned} conflicting revision IDs (prioritizing Move integrity).");
+    }
+
+    /// <summary>
+    /// Ensures move range end elements have matching IDs with their corresponding start elements.
+    /// According to ISO 29500, RangeEnd must match RangeStart id.
+    /// </summary>
+    private static void EnsureMoveRangeStartEndIdsMatch(WordprocessingDocument doc, Action<string>? log)
+    {
+        var main = doc.MainDocumentPart;
+        if (main == null) return;
+
+        var fixedCount = 0;
+
+        foreach (var root in EnumerateStoryRoots(main))
+        {
+            var fromStack = new Stack<MoveFromRangeStart>();
+            var toStack = new Stack<MoveToRangeStart>();
+
+            foreach (var el in root.Descendants())
+            {
+                switch (el)
+                {
+                    case MoveFromRangeStart s:
+                        fromStack.Push(s);
+                        break;
+
+                    case MoveFromRangeEnd e when fromStack.Count > 0:
+                    {
+                        var s = fromStack.Pop();
+                        var want = s.Id?.Value;
+                        if (!string.IsNullOrWhiteSpace(want) && e.Id?.Value != want)
+                        {
+                            e.Id = want;
+                            fixedCount++;
+                        }
+                        break;
+                    }
+
+                    case MoveToRangeStart s:
+                        toStack.Push(s);
+                        break;
+
+                    case MoveToRangeEnd e when toStack.Count > 0:
+                    {
+                        var s = toStack.Pop();
+                        var want = s.Id?.Value;
+                        if (!string.IsNullOrWhiteSpace(want) && e.Id?.Value != want)
+                        {
+                            e.Id = want;
+                            fixedCount++;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (fixedCount > 0)
+                root.Save();
+        }
+
+        if (fixedCount > 0)
+            log?.Invoke($"Fixed {fixedCount} move range id mismatches (RangeEnd now matches RangeStart).");
+    }
+
+    /// <summary>
+    /// Converts fragile Move operations to robust Del/Ins.
+    /// Move operations in OOXML are notoriously fragile - Word is very strict about their implementation.
+    /// Converting to simple del/ins is more reliable.
+    /// </summary>
+    private static void ConvertMovesToDelIns(WordprocessingDocument doc, Action<string>? log)
+    {
+        var main = doc.MainDocumentPart;
+        if (main == null) return;
+
+        var convertedCount = 0;
+
+        foreach (var root in EnumerateStoryRoots(main))
+        {
+            // 1. Convert Inline MoveFrom -> DeletedRun
+            foreach (var mf in root.Descendants<MoveFromRun>().ToList())
+            {
+                var del = new DeletedRun { Id = mf.Id, Author = mf.Author, Date = mf.Date };
+                del.InnerXml = mf.InnerXml; // Move contents
+                mf.Parent?.InsertAfter(del, mf);
+                mf.Remove();
+                convertedCount++;
+            }
+
+            // 2. Convert Inline MoveTo -> InsertedRun
+            foreach (var mt in root.Descendants<MoveToRun>().ToList())
+            {
+                var ins = new InsertedRun { Id = mt.Id, Author = mt.Author, Date = mt.Date };
+                ins.InnerXml = mt.InnerXml;
+                mt.Parent?.InsertAfter(ins, mt);
+                mt.Remove();
+                convertedCount++;
+            }
+
+            // 3. Remove Range Markers (Start/End)
+            root.Descendants<MoveFromRangeStart>().ToList().ForEach(e => e.Remove());
+            root.Descendants<MoveFromRangeEnd>().ToList().ForEach(e => e.Remove());
+            root.Descendants<MoveToRangeStart>().ToList().ForEach(e => e.Remove());
+            root.Descendants<MoveToRangeEnd>().ToList().ForEach(e => e.Remove());
+
+            root.Save();
+        }
+
+        if (convertedCount > 0)
+            log?.Invoke($"Converted {convertedCount} Move operations to Del/Ins.");
+    }
+
+    /// <summary>
+    /// Completely renumbers ALL revision IDs in the document sequentially (1, 2, 3...).
+    /// This guarantees 0 collisions and satisfies Word's strict unique ID requirement.
+    /// </summary>
+    private static void RenumberAllRevisions(WordprocessingDocument doc, Action<string>? log)
+    {
+        var main = doc.MainDocumentPart;
+        if (main == null) return;
+
+        var count = 0;
+        int nextId = 1;
+
+        foreach (var root in EnumerateStoryRoots(main))
+        {
+            // 1. Map current Move IDs to New IDs to preserve Start/End links
+            var moveIdMap = new Dictionary<string, string>();
+
+            // Find all elements that use IDs (Content Revisions + Formatting Revisions + Moves)
+            // We grab them in document order.
+            var allRevisions = root.Descendants().Where(e =>
+                e is DeletedRun ||
+                e is InsertedRun ||
+                e is Deleted ||      // Formatting deletion (pPr/rPr)
+                e is Inserted ||     // Formatting insertion
+                e is MoveFromRun ||
+                e is MoveToRun ||
+                e is MoveFromRangeStart ||
+                e is MoveToRangeStart
+            ).ToList();
+
+            foreach (var el in allRevisions)
+            {
+                var oldId = GetRevisionId(el);
+
+                // Generate new ID
+                var newId = nextId.ToString();
+
+                // If this is a Move Start, store the mapping so the End can match it
+                if (el is MoveFromRangeStart || el is MoveToRangeStart)
+                {
+                    if (!string.IsNullOrEmpty(oldId))
+                    {
+                        moveIdMap[oldId] = newId; // Map Old -> New
+                    }
+                }
+
+                // Set the new ID
+                SetRevisionId(el, newId);
+                nextId++;
+                count++;
+            }
+
+            // 2. Fix Move Range ENDs using the map
+            // RangeEnds define the end of a move but don't define a *new* ID;
+            // they must reference the Start ID.
+            var rangeEnds = root.Descendants().Where(e =>
+                e is MoveFromRangeEnd ||
+                e is MoveToRangeEnd
+            ).ToList();
+
+            foreach (var endEl in rangeEnds)
+            {
+                var oldId = GetRevisionId(endEl);
+                if (!string.IsNullOrEmpty(oldId) && moveIdMap.TryGetValue(oldId, out var linkedNewId))
+                {
+                    SetRevisionId(endEl, linkedNewId);
+                }
+                else
+                {
+                    // Orphaned end tag? Assign a fresh ID to satisfy schema,
+                    // though strictly this implies broken xml structure.
+                    SetRevisionId(endEl, nextId.ToString());
+                    nextId++;
+                }
+            }
+
+            if (count > 0) root.Save();
+        }
+
+        log?.Invoke($"Globally renumbered {count} revisions.");
     }
 
     /// <summary>

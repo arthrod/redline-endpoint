@@ -1,0 +1,5104 @@
+--- /Users/arthrod/temp/Manual Library/temp/redline-endpoint/diagnosis/unpacked-move-integrity/word/document.xml	2026-01-18 02:02:52 +0000
++++ /Users/arthrod/temp/Manual Library/temp/redline-endpoint/diagnosis/TEST_with_working_ids/word/document.xml	2026-01-18 01:41:31 +0000
+@@ -45,10 +45,10 @@
+ <w:body>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4B9BA395" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0C2F5786" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -76,10 +76,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2CDF6CFD" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="05C99983" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -107,9 +107,9 @@
+ </w:r>
+       
+ <w:del 
++w:id="0" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="0"
+ >
+         
+ <w:r>
+@@ -123,9 +123,9 @@
+ </w:del>
+       
+ <w:ins 
++w:id="1" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="1"
+ >
+         
+ <w:r>
+@@ -149,9 +149,9 @@
+ </w:r>
+       
+ <w:del 
++w:id="2" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="2"
+ >
+         
+ <w:r>
+@@ -167,9 +167,9 @@
+ </w:del>
+       
+ <w:ins 
++w:id="3" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="3"
+ >
+         
+ <w:r>
+@@ -185,10 +185,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1264E1EE" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="07231572" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -206,9 +206,9 @@
+ <w:rPr>
+           
+ <w:del 
++w:id="4" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="4"
+ />
+         
+ </w:rPr>
+@@ -216,9 +216,9 @@
+ </w:pPr>
+       
+ <w:del 
++w:id="5" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="5"
+ >
+         
+ <w:r>
+@@ -234,10 +234,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="433C2DE5" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7E898522" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -255,9 +255,9 @@
+ <w:rPr>
+           
+ <w:del 
++w:id="6" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="6"
+ />
+         
+ </w:rPr>
+@@ -265,9 +265,9 @@
+ </w:pPr>
+       
+ <w:del 
++w:id="7" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="7"
+ >
+         
+ <w:r>
+@@ -283,10 +283,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="76B97A23" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0707DFA0" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -308,9 +308,9 @@
+ <w:rPr>
+           
+ <w:del 
++w:id="8" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="8"
+ />
+         
+ </w:rPr>
+@@ -318,9 +318,9 @@
+ </w:pPr>
+       
+ <w:del 
++w:id="9" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="9"
+ >
+         
+ <w:r>
+@@ -336,10 +336,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="448F89A6" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0B5844F0" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -361,9 +361,9 @@
+ <w:rPr>
+           
+ <w:del 
++w:id="10" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="10"
+ />
+         
+ </w:rPr>
+@@ -371,9 +371,9 @@
+ </w:pPr>
+       
+ <w:del 
++w:id="11" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="11"
+ >
+         
+ <w:r>
+@@ -389,10 +389,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="51A08596" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="046E9EF5" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -410,9 +410,9 @@
+ <w:rPr>
+           
+ <w:del 
++w:id="12" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="12"
+ />
+         
+ </w:rPr>
+@@ -420,9 +420,9 @@
+ </w:pPr>
+       
+ <w:del 
++w:id="13" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="13"
+ >
+         
+ <w:r>
+@@ -438,10 +438,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1631B4FE" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="37AB0AD2" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -469,10 +469,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0BF94486" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="28B78B24" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -504,10 +504,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="74C690C2" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="05A826AD" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -539,10 +539,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="00AC58A5" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3C24B94B" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -574,10 +574,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6ED15049" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="1C5E6F3B" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -605,10 +605,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6F01F003" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0D483FA0" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -636,9 +636,9 @@
+ </w:r>
+       
+ <w:del 
++w:id="14" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="14"
+ >
+         
+ <w:r>
+@@ -652,31 +652,15 @@
+ </w:del>
+       
+ <w:ins 
++w:id="15" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="15"
+ >
+         
+ <w:r>
+           
+ <w:t>
+-significados:
+-</w:t>
+-        
+-</w:r>
+-      
+-</w:ins>
+-      
+-<w:ins 
+-w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
+-w:id="16"
+->
+-        
+-<w:r>
+-          
+-<w:t>
+-blalblablalblalbalblablalbalbla
++significados:blalblablalblalbalblablalbalbla
+ </w:t>
+         
+ </w:r>
+@@ -686,10 +670,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="38619342" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3F5E4198" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -721,10 +705,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="125B21AC" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="1CE47FD3" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -756,10 +740,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4D277D07" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6D428C2C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -791,10 +775,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7EF4628F" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="723DC824" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -826,10 +810,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0076132C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0E73AF13" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -861,10 +845,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4CCA1ED4" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="082D5745" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -896,10 +880,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="010D8C6E" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="620006CE" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -931,10 +915,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7FD0F5A1" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="23067278" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -966,10 +950,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0E6C1EFF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="671CADED" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1001,10 +985,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="64EDE517" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="360E0A77" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1036,10 +1020,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="157A9600" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6FA28075" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1071,10 +1055,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1AD92E08" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="570B5E3D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1106,10 +1090,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="18C7ACF2" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="05A97DA4" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1141,10 +1125,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="3F4270B1" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="24BCFC78" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1167,6 +1151,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ Tag-Along: direito de venda conjunta previsto na Cláusula 9.3.
+ </w:t>
+@@ -1176,10 +1162,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="72EA19A7" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="56F2ED10" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1211,10 +1197,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="19E71654" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7D06369F" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1242,10 +1228,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="51505554" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="143A1FBA" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1273,10 +1259,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="11E655EE" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4B04C628" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1304,10 +1290,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4C7B39D7" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="25D63743" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1333,39 +1319,46 @@
+ </w:r>
+       
+ <w:moveFromRangeStart 
++w:id="16" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z" 
+-w:name="move1" 
++w:name="move1"
+-w:id="18"
+ />
+       
+ <w:moveFrom 
++w:id="17" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="19"
+ >
+         
+-<w:r>
++<w:del 
++w:id="18" 
++w:author="Unknown"
++>
+           
++<w:r>
++            
+ <w:delText>
+ , PRAZO E EXERCÍCIO SOCIAL
+ </w:delText>
+-        
++          
+ </w:r>
++        
++</w:del>
+       
+ </w:moveFrom>
+       
+ <w:moveFromRangeEnd 
+-w:id="18"
++w:id="16"
+ />
+     
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2E66D7A8" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="70CAD785" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1383,26 +1376,19 @@
+ <w:rPr>
+           
+ <w:del 
++w:id="19" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="17"
+ />
+         
+ </w:rPr>
+       
+ </w:pPr>
+       
+-<w:moveFromRangeStart 
+-w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
+-w:name="move2" 
++<w:del 
+-w:id="20"
++w:id="20" 
+-/>
+-      
+-<w:moveFrom 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="21"
+ >
+         
+ <w:r>
+@@ -1413,19 +1399,15 @@
+         
+ </w:r>
+       
+-</w:moveFrom>
++</w:del>
+-      
+-<w:moveFromRangeEnd 
+-w:id="20"
+-/>
+     
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="3A6C06BF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="297EE1E9" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1443,22 +1425,38 @@
+ <w:rPr>
+           
+ <w:del 
++w:id="21" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="51"
+ />
+         
+ </w:rPr>
+       
+ </w:pPr>
++      
++<w:del 
++w:id="22" 
++w:author="Test User" 
++w:date="2026-01-16T08:20:00Z"
++>
++        
++<w:r>
++          
++<w:delText>
++5.2 Sede: [endereço completo: logradouro, nº, complemento, bairro, município, UF, CEP]. [OPÇÃO: Estabelecer filiais/escritórios mediante deliberação da Administração ou dos Sócios, conforme Cláusula 11.]
++</w:delText>
++        
++</w:r>
++      
++</w:del>
+     
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="5D4BA880" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5A6F475D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1476,22 +1474,38 @@
+ <w:rPr>
+           
+ <w:del 
++w:id="23" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="52"
+ />
+         
+ </w:rPr>
+       
+ </w:pPr>
++      
++<w:del 
++w:id="24" 
++w:author="Test User" 
++w:date="2026-01-16T08:20:00Z"
++>
++        
++<w:r>
++          
++<w:delText>
++5.3 Prazo de duração: por prazo [determinado: até [DATA]; ou indeterminado].
++</w:delText>
++        
++</w:r>
++      
++</w:del>
+     
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="3A8C0B8B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5903C829" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1509,22 +1523,56 @@
+ <w:rPr>
+           
+ <w:del 
++w:id="25" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="53"
+ />
+         
+ </w:rPr>
+       
+ </w:pPr>
++      
++<w:moveFromRangeStart 
++w:id="26" 
++w:author="Test User" 
++w:date="2026-01-16T08:20:00Z" 
++w:name="move2"
++/>
++      
++<w:moveFrom 
++w:id="27" 
++w:author="Test User" 
++w:date="2026-01-16T08:20:00Z"
++>
++        
++<w:del 
++w:id="28" 
++w:author="Unknown"
++>
++          
++<w:r>
++            
++<w:delText>
++5.4 O exercício social encerra-se em [DATA], quando serão levantadas as demonstrações contábeis, sem prejuízo de balancetes intermediários para fins de deliberação sobre distribuição de resultados.
++</w:delText>
++          
++</w:r>
++        
++</w:del>
++      
++</w:moveFrom>
++      
++<w:moveFromRangeEnd 
++w:id="26"
++/>
+     
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="29A3B38E" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="31EA1A2B" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1552,10 +1600,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="082C232F" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="74AAA43A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1583,10 +1631,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="204E7853" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6CE68640" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1618,10 +1666,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7D6ACF1B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="385C8F83" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1653,10 +1701,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="05983F8A" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="71DC8D87" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1684,10 +1732,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="3CCA46DB" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="375030F7" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1719,10 +1767,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="370D2277" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="464181F2" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1754,10 +1802,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0DF00015" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="50FDEBBE" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1789,10 +1837,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4B3FD8BB" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="69D9B8F1" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1820,10 +1868,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6B6A5320" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5DA97A0C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1845,15 +1893,27 @@
+ <w:t 
+ xml:space="preserve"
+ >
+-6.4 Mora na integralização: O Sócio em mora sujeita-se a (i) multa de [X]% e juros de [Y]% a.m.; (ii) atualização pelo [índice]; (iii) suspensão de direitos políticos e econômicos até a purgação; e (iv) eventual redução da participação e/ou exclusão, conforme arts. 1.004, 1.058 e 1.085 do CC, 
++6.4 Mora na integralização: O Sócio em mora sujeita-se a (i) multa de [X]% e juros de [Y]% a.m.; (ii) atualização pelo [índice]; (iii) suspensão de direitos políticos e econômicos 
++</w:t>
++      
++</w:r>
++      
++<w:r>
++        
++<w:lastRenderedPageBreak/>
++        
++<w:t 
++xml:space="preserve"
++>
++até a purgação; e (iv) eventual redução da participação e/ou exclusão, conforme arts. 1.004, 1.058 e 1.085 do CC, 
+ </w:t>
+       
+ </w:r>
+       
+ <w:del 
++w:id="29" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="49"
+ >
+         
+ <w:r>
+@@ -1867,16 +1927,16 @@
+ </w:del>
+       
+ <w:moveToRangeStart 
++w:id="30" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z" 
+-w:name="move1" 
++w:name="move1"
+-w:id="33"
+ />
+       
+ <w:moveTo 
++w:id="31" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="34"
+ >
+         
+ <w:r>
+@@ -1890,16 +1950,16 @@
+ </w:moveTo>
+       
+ <w:moveToRangeEnd 
+-w:id="33"
++w:id="30"
+ />
+     
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6903E09E" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="2BC98AFC" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1917,9 +1977,9 @@
+ <w:rPr>
+           
+ <w:ins 
++w:id="32" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="22"
+ />
+         
+ </w:rPr>
+@@ -1927,9 +1987,9 @@
+ </w:pPr>
+       
+ <w:ins 
++w:id="33" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="23"
+ >
+         
+ <w:r>
+@@ -1945,10 +2005,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="54CD001D" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0E25B4F8" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -1966,9 +2026,9 @@
+ <w:rPr>
+           
+ <w:ins 
++w:id="34" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="24"
+ />
+         
+ </w:rPr>
+@@ -1976,9 +2036,9 @@
+ </w:pPr>
+       
+ <w:ins 
++w:id="35" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="25"
+ >
+         
+ <w:r>
+@@ -1994,10 +2054,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="578A35E5" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="668844AF" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2015,9 +2075,9 @@
+ <w:rPr>
+           
+ <w:ins 
++w:id="36" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="26"
+ />
+         
+ </w:rPr>
+@@ -2025,9 +2085,9 @@
+ </w:pPr>
+       
+ <w:ins 
++w:id="37" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="27"
+ >
+         
+ <w:r>
+@@ -2043,10 +2103,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6C427877" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3AB25E6A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2064,9 +2124,9 @@
+ <w:rPr>
+           
+ <w:ins 
++w:id="38" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="28"
+ />
+         
+ </w:rPr>
+@@ -2074,9 +2134,9 @@
+ </w:pPr>
+       
+ <w:ins 
++w:id="39" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="29"
+ >
+         
+ <w:r>
+@@ -2092,10 +2152,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4D146B1C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="44A3615C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2113,9 +2173,9 @@
+ <w:rPr>
+           
+ <w:ins 
++w:id="40" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="30"
+ />
+         
+ </w:rPr>
+@@ -2123,9 +2183,9 @@
+ </w:pPr>
+       
+ <w:ins 
++w:id="41" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="31"
+ >
+         
+ <w:r>
+@@ -2141,10 +2201,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="235DF102" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="216F8DF4" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2172,10 +2232,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="65F3996A" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5A9C8622" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2203,10 +2263,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4D51607B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="401A0558" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2234,10 +2294,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="45EF3AE1" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7C445892" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2265,10 +2325,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="05B2AEAC" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="02F462A2" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2296,10 +2356,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="32E3A34C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="312D9250" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2327,10 +2387,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="61FC77E5" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="64ECDA79" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2358,10 +2418,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2D906B80" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7F978066" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2389,10 +2449,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1878E924" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4585722D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2411,6 +2471,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ CESSÃO, ÔNUS E DIREITO DE PREFERÊNCIA SOBRE QUOTAS
+ </w:t>
+@@ -2420,10 +2482,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7194C32C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="605B244A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2451,10 +2513,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7310588E" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7D9EDB11" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2482,10 +2544,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="55223D3D" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="10287F33" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2513,9 +2575,9 @@
+ </w:r>
+       
+ <w:del 
++w:id="42" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="32"
+ >
+         
+ <w:r>
+@@ -2529,9 +2591,9 @@
+ </w:del>
+       
+ <w:ins 
++w:id="43" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="50"
+ >
+         
+ <w:r>
+@@ -2547,10 +2609,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1D943E87" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0EB46649" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2568,26 +2630,19 @@
+ <w:rPr>
+           
+ <w:ins 
++w:id="44" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="54"
+ />
+         
+ </w:rPr>
+       
+ </w:pPr>
+       
+-<w:moveToRangeStart 
++<w:ins 
+-w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
+-w:name="move2" 
+-w:id="47"
++w:id="45" 
+-/>
+-      
+-<w:moveTo 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="48"
+ >
+         
+ <w:r>
+@@ -2598,19 +2653,15 @@
+         
+ </w:r>
+       
+-</w:moveTo>
++</w:ins>
+-      
+-<w:moveToRangeEnd 
+-w:id="47"
+-/>
+     
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="5B2F9410" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="62545FA5" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2628,22 +2679,38 @@
+ <w:rPr>
+           
+ <w:ins 
++w:id="46" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="35"
+ />
+         
+ </w:rPr>
+       
+ </w:pPr>
++      
++<w:ins 
++w:id="47" 
++w:author="Test User" 
++w:date="2026-01-16T08:20:00Z"
++>
++        
++<w:r>
++          
++<w:t>
++5.2 Sede: [endereço completo: logradouro, nº, complemento, bairro, município, UF, CEP]. [OPÇÃO: Estabelecer filiais/escritórios mediante deliberação da Administração ou dos Sócios, conforme Cláusula 11.]
++</w:t>
++        
++</w:r>
++      
++</w:ins>
+     
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4B500D8B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4B8F2E04" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2661,22 +2728,38 @@
+ <w:rPr>
+           
+ <w:ins 
++w:id="48" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="36"
+ />
+         
+ </w:rPr>
+       
+ </w:pPr>
++      
++<w:ins 
++w:id="49" 
++w:author="Test User" 
++w:date="2026-01-16T08:20:00Z"
++>
++        
++<w:r>
++          
++<w:t>
++5.3 Prazo de duração: por prazo [determinado: até [DATA]; ou indeterminado].
++</w:t>
++        
++</w:r>
++      
++</w:ins>
+     
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="59245E45" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3D863917" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2694,22 +2777,38 @@
+ <w:rPr>
+           
+ <w:ins 
++w:id="50" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="37"
+ />
+         
+ </w:rPr>
+       
+ </w:pPr>
++      
++<w:ins 
++w:id="51" 
++w:author="Test User" 
++w:date="2026-01-16T08:20:00Z"
++>
++        
++<w:r>
++          
++<w:t>
++5.4 O exercício social encerra-se em [DATA], quando serão levantadas as demonstrações contábeis, sem prejuízo de balancetes intermediários para fins de deliberação sobre distribuição de resultados.
++</w:t>
++        
++</w:r>
++      
++</w:ins>
+     
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="63414F90" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5F00A38F" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2731,22 +2830,49 @@
+ <w:rPr>
+           
+ <w:ins 
++w:id="52" 
+ w:author="Test User" 
+-w:date="2026-01-18T02:02:51Z" 
++w:date="2026-01-16T08:20:00Z"
+-w:id="38"
+ />
+         
+ </w:rPr>
+       
+ </w:pPr>
++      
++<w:moveToRangeStart 
++w:id="53" 
++w:author="Test User" 
++w:date="2026-01-16T08:20:00Z" 
++w:name="move2"
++/>
++      
++<w:moveTo 
++w:id="54" 
++w:author="Test User" 
++w:date="2026-01-16T08:20:00Z"
++>
++        
++<w:r>
++          
++<w:t>
++rsa mais rigorosa.
++</w:t>
++        
++</w:r>
++      
++</w:moveTo>
++      
++<w:moveToRangeEnd 
++w:id="53"
++/>
+     
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="5B9620A0" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3626D0DC" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2778,10 +2904,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="296E87BF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0193F08C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2813,10 +2939,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="105A7A43" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0D83579D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2844,10 +2970,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7A1127F0" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="31F3448C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2875,10 +3001,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7F362CF3" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="578BE697" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2906,10 +3032,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="5C6775C3" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="02E19256" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2937,10 +3063,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="081DB40D" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="30A298CB" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2968,10 +3094,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="76911403" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="10256329" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -2990,6 +3116,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ 9.3 Tag-along [OPÇÃO – ON]: Na venda que resulte na transferência de controle ou de [50%+] do capital votante/econômico, os Sócios minoritários terão direito de vender suas quotas nas mesmas condições e preço por quota (pari passu), em proporção a sua participação, com prazo de adesão de [15–30] dias.
+ </w:t>
+@@ -2999,10 +3127,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="36B9A742" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="64664EDF" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3030,10 +3158,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0B5265AC" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0292C32A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3061,10 +3189,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="73133107" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="706CE25E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3092,10 +3220,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="424CC690" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6E150621" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3123,10 +3251,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="166A673E" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="32D94186" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3154,10 +3282,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0B0782B4" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="46DAE29B" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3185,10 +3313,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="3A2DEA50" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3A590CDE" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3216,10 +3344,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0E82DE60" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0F5A4614" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3247,10 +3375,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4D99BE26" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="26080F6D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3278,10 +3406,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1E209744" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="45807747" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3309,10 +3437,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6357CEE9" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="397BC839" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3331,6 +3459,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ 10.8 Substituição/suspensão: Por impedimento, ausência ou vacância, observar-se-á [cronograma de substituição]. A suspensão cautelar poderá ser deliberada por [maioria/2/3] do capital em caso de falta grave.
+ </w:t>
+@@ -3340,10 +3470,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="3AA9BE3A" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4DE4D00F" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3371,10 +3501,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1CF37B08" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="2CF4AC48" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3402,10 +3532,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="43C3B214" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="47080CC5" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3433,10 +3563,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="459390BE" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4B371942" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3464,10 +3594,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="49249CF1" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="33E52808" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3499,10 +3629,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1CA5B42D" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7BC78FCF" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3534,10 +3664,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1BFDE809" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="02770DF3" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3565,10 +3695,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="76BB51E5" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="222A7F5E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3600,10 +3730,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0B41B9FA" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="56280C4E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3635,10 +3765,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="738861FE" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6A67E3DE" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3670,10 +3800,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="522433A0" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="39A77419" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3705,10 +3835,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="51DD5F9C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3BF56324" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3740,10 +3870,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="34A9BF63" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="1A1F4FCA" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3775,10 +3905,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6F1FF907" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="17D4010D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3810,10 +3940,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="38A166FF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="22519FD7" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3845,10 +3975,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="22F91C3B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3C6B9DA9" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3876,10 +4006,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="49BCC3DF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3AA6C4E2" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3907,10 +4037,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="69B323F1" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4AA94F9E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3929,6 +4059,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ 12.2 Lucros intermediários: Admitida distribuição de lucros com base em balanços/balancetes intermediários, observadas a legislação societária e fiscal, e a preservação da solvência.
+ </w:t>
+@@ -3938,10 +4070,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1876BDE7" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="13EAD2BC" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -3969,10 +4101,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1E60093B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="576D5D6D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4000,10 +4132,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="654EECC1" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="1E841C3D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4035,10 +4167,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1FDD9D87" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="76FE971A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4070,10 +4202,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="13F10FB9" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="43940DFA" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4101,10 +4233,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="21F4F138" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="20D8EA01" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4132,10 +4264,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4CD6AFFC" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="63A84EE0" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4163,10 +4295,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="632A2AB1" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="748BEA25" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4194,10 +4326,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="63B4A177" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="50521EC7" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4225,10 +4357,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="23A331EA" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="65E1166C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4256,10 +4388,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="46BEB620" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="258006B0" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4287,10 +4419,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1D5DB47B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="77A371A2" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4318,10 +4450,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2EE197C5" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0A3E7BFC" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4349,10 +4481,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1F88262D" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4D14FBA9" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4371,6 +4503,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ 15.2 Retirada/denúncia: O Sócio poderá retirar-se nas hipóteses legais, mediante notificação com [60] dias de antecedência, se por prazo indeterminado, ou nos casos previstos em lei/contrato, com apuração de haveres.
+ </w:t>
+@@ -4380,10 +4514,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="452D5C5F" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4E9E6F54" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4411,10 +4545,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="783D820C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="1F4D0AD4" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4442,10 +4576,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6AB308E2" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="641B0C0E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4473,10 +4607,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7168AFF9" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="08183A60" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4504,10 +4638,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="5833D68C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="79511AEC" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4535,10 +4669,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="57BA92B3" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4E59F623" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4566,10 +4700,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2B9AAEB3" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3B0A50AA" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4601,10 +4735,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="682CE26A" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5DC54621" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4636,10 +4770,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1CF6F119" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="73F28A3D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4671,10 +4805,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="488C17D6" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0AF1784D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4706,10 +4840,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="417B38B8" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="73D1940E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4741,10 +4875,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2F3BCBBA" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3CFE6693" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4776,10 +4910,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="24037317" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4E65423C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4807,10 +4941,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="33630F00" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="688E6F1E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4833,6 +4967,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ Titularidade: Pertencerá à Sociedade toda a PI desenvolvida por administradores, empregados, prestadores e Sócios no âmbito do objeto social e com recursos/sigilo da Sociedade, mediante cessão/licença apropriada.
+ </w:t>
+@@ -4842,10 +4978,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7A433E13" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3A28337A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4877,10 +5013,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="00B15F42" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6DAB72B6" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4912,10 +5048,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2FA0204C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5F6948FC" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4943,10 +5079,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2D03DBBA" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="56717E9C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -4974,10 +5110,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="081144EE" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5507B7E9" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5005,10 +5141,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="198E0BD5" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="19D9F884" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5036,10 +5172,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7968B065" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0F18BF26" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5067,10 +5203,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="40441C39" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="72B1EF13" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5098,10 +5234,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0FFB8CCE" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4941F9AC" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5129,10 +5265,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="405562FF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="193D8BE6" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5160,10 +5296,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="26C3B844" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="475EA68F" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5191,10 +5327,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="3D80C432" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="51E343C6" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5222,10 +5358,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0FF3948C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6E4E9E49" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5248,6 +5384,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ Etapa 1: Mesa de Sócios e Administradores em até [10] dias.
+ </w:t>
+@@ -5257,10 +5395,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0E96854C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="29877586" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5292,10 +5430,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="3F845E32" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="09D88B43" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5327,10 +5465,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="541E76BC" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="03E2D393" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5358,10 +5496,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2FBDEA95" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7D868540" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5389,10 +5527,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="23DD1944" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="73DB14D4" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5420,10 +5558,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="741F15F3" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0D175ED6" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5451,10 +5589,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6799F9B8" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4C933AB4" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5482,10 +5620,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="190DFE02" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="54528F4B" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5513,10 +5651,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="48D6575C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3E9CA700" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5544,10 +5682,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="61E24CF2" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="502B9A4E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5575,10 +5713,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="41AEC8AA" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="20ED19B4" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5606,10 +5744,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6954F90C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7D109295" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5637,10 +5775,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7BE332A6" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="625C4D3E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5668,10 +5806,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="561AFCB8" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="301855C4" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5699,10 +5837,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="645E06C4" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6DE3BBF0" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5721,6 +5859,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ 23.1 Comunicações: Serão consideradas válidas as notificações enviadas por escrito para os endereços físicos e eletrônicos constantes deste Contrato, inclusive via e-mail [endereços], com confirmação de leitura/recebimento, admitidos meios eletrônicos.
+ </w:t>
+@@ -5730,10 +5870,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="06368AF0" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="108847B2" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5761,10 +5901,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="757CC4B8" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="2B2B4642" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5792,10 +5932,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4E93B523" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="34E2D53F" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5823,10 +5963,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1398E7F1" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3B1D0B7B" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5854,10 +5994,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6C06D56D" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="048B2AC5" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5885,10 +6025,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="5D369E5F" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="16116A8E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5916,10 +6056,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="13669262" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="2DDA390C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5947,10 +6087,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="610A7458" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="252219F5" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -5978,10 +6118,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="691E3D64" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6FCD502F" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6013,10 +6153,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="482614F9" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="182B226A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6048,10 +6188,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="77FF60A8" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="31568E84" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6079,10 +6219,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1B2C02D2" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="61D6D19C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6114,10 +6254,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0274FA73" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="444DF11A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6145,10 +6285,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="5CB8BE2E" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5028FC4E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6176,10 +6316,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="3664D197" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="432B07C8" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6207,10 +6347,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="54C96765" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="2C22CE68" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6238,10 +6378,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4D9069DA" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5F674C28" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6273,10 +6413,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="3839BA12" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="346514A3" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6308,10 +6448,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="19A41145" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="38EB05EB" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6334,6 +6474,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ Capital Social: R$ [VALOR], integralizado pelo Sócio Único em [dinheiro/bens], conforme laudo se aplicável.
+ </w:t>
+@@ -6343,10 +6485,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4637378B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6C73302B" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6378,10 +6520,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4F5AA12B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="276A4CCA" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6413,10 +6555,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="62E5C802" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3455AAAA" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6448,10 +6590,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2436E951" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4FD614E7" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6483,10 +6625,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="69A1942D" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5D68329F" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6514,10 +6656,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="76BE74AF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7CC68A7A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6545,10 +6687,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="038F64D3" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7ABE065D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6576,10 +6718,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2F1BA0E2" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="33A56026" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6611,10 +6753,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="51F7DAB6" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="05DCC828" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6646,10 +6788,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2C8E6570" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3408A49B" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6681,10 +6823,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6DD6540C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="384E0B6D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6716,10 +6858,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="526352CF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7EB2F0E7" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6751,10 +6893,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="476CB22E" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="476BC492" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6786,10 +6928,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2FFC6687" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="42A93A2D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6821,10 +6963,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="00F61E64" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3C6891A9" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6856,10 +6998,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7CF89188" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0BFDCC0C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6891,10 +7033,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="66F3F8E1" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="79AEB77B" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6926,10 +7068,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="389FB950" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="78244585" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6961,10 +7103,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="62950947" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5884C3F5" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -6996,10 +7138,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0A91D31F" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3855E0BD" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7031,10 +7173,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="175CF613" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="762D895E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7066,10 +7208,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6458F803" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6F8BC0EC" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7101,10 +7243,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="442F855F" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="63E8C803" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7136,10 +7278,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6E1C7822" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0FFFEF64" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7171,10 +7313,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="55399C66" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="793EA10F" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7206,10 +7348,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1E31CC0C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7A49CED0" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7241,10 +7383,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="776DBDC6" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6AFE1D66" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7276,10 +7418,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="481657D4" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0F2F4CA7" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7311,10 +7453,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1C344672" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0BD4668C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7337,6 +7479,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ Compliance anticorrupção (políticas, auditorias): [ ]
+ </w:t>
+@@ -7346,10 +7490,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1C7F4282" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5251C255" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7381,10 +7525,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="59272674" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6CD68F8A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7416,10 +7560,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4DFB16F1" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="32AF4639" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7451,10 +7595,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="34ABFD7C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="2ED00EE3" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7486,10 +7630,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="45284108" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4AC3C301" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7517,10 +7661,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="3453B895" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3A08E368" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7552,10 +7696,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0ADCFC75" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="56E23593" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7587,10 +7731,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="5ACDBD30" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4D9A1C9C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7622,10 +7766,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="21DFCC7B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5FA5AC5D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7657,10 +7801,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="21B44FB2" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="550331C4" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7692,10 +7836,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1D621E4E" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="1E35A1F5" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7727,10 +7871,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="58316A7B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="074AFC17" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7762,10 +7906,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7ACEC9D8" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="026CDFF0" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7797,10 +7941,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6A226983" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="314FC074" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7832,10 +7976,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4536C525" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="63A8812F" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7867,10 +8011,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6135EE43" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="2E0A6077" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7902,10 +8046,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6D0267AA" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="628B8535" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7937,10 +8081,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="104FD11B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="73FDC8C7" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -7972,10 +8116,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6115C54F" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="2904FF54" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8007,10 +8151,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1B3F5300" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0132BB41" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8038,10 +8182,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="675FDEAB" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="2126ACCB" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8073,10 +8217,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="63EE44BF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="23BE9B4B" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8108,10 +8252,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="46D0528A" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6B1007DF" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8143,10 +8287,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="40FB5B57" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="102B6B34" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8169,6 +8313,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ Exclusão extrajudicial (CC, art. 1.085): Requer previsão contratual, falta grave, deliberação de mais da metade do capital, convocação específica e garantia de defesa. A eficácia interna de aditivos entre sócios é reconhecida pela jurisprudência, sem prejuízo do arquivamento para oponibilidade erga omnes.
+ </w:t>
+@@ -8178,10 +8324,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="05EBDEF8" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="573FC604" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8213,10 +8359,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="44D572B6" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="14496A05" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8248,10 +8394,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4B9E86CF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4EE00D83" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8283,10 +8429,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1BA6931C" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5F210A8C" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8318,10 +8464,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="60665FD4" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="0EB12E64" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8353,10 +8499,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="52772CDE" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7267B30A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8388,10 +8534,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="41012D38" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="35A1AFE9" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8423,10 +8569,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="65309EC0" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="2C4EF4F0" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8458,10 +8604,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="15470AB0" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="03DDD87E" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8489,10 +8635,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6171BABB" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="173BDF9A" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8524,10 +8670,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="63158BFF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="31D14437" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8559,10 +8705,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="4CA89D56" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="711390EB" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8594,10 +8740,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7BA8D510" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="41156BA8" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8629,10 +8775,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1702CB70" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="52A57F36" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8664,10 +8810,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="61434E7E" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="171218AC" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8699,10 +8845,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6E272A90" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="501DB9FB" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8734,10 +8880,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6F98BAA4" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="77D7CF7F" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8769,10 +8915,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="513D07CF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="2AE00620" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8795,6 +8941,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ Tag-along/Drag-along: Tag-along/Drag-along.
+ </w:t>
+@@ -8804,10 +8952,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2D616F23" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="27288006" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8839,10 +8987,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="0DF14A84" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="1657D963" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8874,10 +9022,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="7CC45149" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="08079F21" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8909,10 +9057,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="126F6B96" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6DF7AA2B" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8944,10 +9092,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="577F1BF4" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="61A927BC" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -8979,10 +9127,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="42603DE7" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="40577CC6" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9014,10 +9162,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="01338DBB" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6A3D1801" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9049,10 +9197,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="31D0E500" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="29BBE271" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9084,10 +9232,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="35EDEEF8" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="5372020D" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9115,10 +9263,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="03F56764" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="03E82E32" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9150,10 +9298,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="788C278A" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="6289980F" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9185,10 +9333,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="33D5CC86" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="032276EA" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9220,10 +9368,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="2C140008" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="07395978" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9255,10 +9403,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1651F419" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7916DC98" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9286,10 +9434,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="610E179B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="64F0A961" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9317,10 +9465,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="74AC7BCF" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="50CE9110" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9339,8 +9487,20 @@
+       
+ <w:r>
+         
++<w:t 
++xml:space="preserve"
++>
++[1] As 13 disposições necessárias num contrato social - https://www.jusbrasil.com.br/artigos/as-13-disposicoes-necessarias-num-contrato-social/430316131 [2] Enciclopédia Jurídica da PUCSP - https://enciclopediajuridica.pucsp.br/verbete/247/edicao-1/contrato-social [3] Responsabilidade Limitada - https://modeloinicial.com.br/materia/direito-empresarial-societario-contrato-social-responsabilidade-limitada [4] https://www.gov.br/empresas-e-negocios/pt-br/drei/legislacao/arquivos/legislacoes-federais/IN812020alteradapelaIN112e88de2022.pdf - https://www.gov.br/empresas-e-negocios/pt-br/drei/legislacao/arquivos/legislacoes-federais/IN812020alteradapelaIN112e88de2022.pdf [5] Instrução Normativa DREI Nº 1 DE 24/01/2024 - Federal - https://www.legisweb.com.br/legislacao/?id=455198 [6] 
++</w:t>
++      
++</w:r>
++      
++<w:r>
++        
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+-[1] As 13 disposições necessárias num contrato social - https://www.jusbrasil.com.br/artigos/as-13-disposicoes-necessarias-num-contrato-social/430316131 [2] Enciclopédia Jurídica da PUCSP - https://enciclopediajuridica.pucsp.br/verbete/247/edicao-1/contrato-social [3] Responsabilidade Limitada - https://modeloinicial.com.br/materia/direito-empresarial-societario-contrato-social-responsabilidade-limitada [4] https://www.gov.br/empresas-e-negocios/pt-br/drei/legislacao/arquivos/legislacoes-federais/IN812020alteradapelaIN112e88de2022.pdf - https://www.gov.br/empresas-e-negocios/pt-br/drei/legislacao/arquivos/legislacoes-federais/IN812020alteradapelaIN112e88de2022.pdf [5] Instrução Normativa DREI Nº 1 DE 24/01/2024 - Federal - https://www.legisweb.com.br/legislacao/?id=455198 [6] Atualizada 13-11-2023.xlsx - https://jucis.df.gov.br/wp-conteudo/uploads/2025/08/Atualizada-13-11-2023.xlsx-1.pdf [7] Elias, Matias Advogados - https://www.eliasmatias.com/publicacao/em-informa-stj-valida-distribuicao-de-lucros-com-base-nos-dias-efetivamente-trabalhados/1047 [8] STJ valida liberdade contratual para distribuição de lucros de sócios com base em dias trabalhados. - https://boletim.prolikadvogados.com.br/2025/06/12/stj-valida-liberdade-contratual-para-distribuicao-de-lucros-de-socios-com-base-em-dias-trabalhados/ [9] [Resumo] Informativo de Jurisprudência do STJ - Edição 842 - https://www.jusbrasil.com.br/artigos/resumo-informativo-de-jurisprudencia-do-stj-edicao-842/3230724397 [10] Microsoft Word - Documento1 - https://lavioletera.com.br/uploads/Termo_Geral__LGPD_Compliance_Confidencialidade_e_Anticorrupo.pdf?srsltid=AfmBOooC4xzBIqrXGRT6vL7ddUPUHEsqhwzzXYsgPQJfGuNqc2IVBVKz [11] Compliance empresarial: estratégias legais para prevenção de riscos - https://jusdocs.com/blog/compliance-empresarial-estrategias-legais-para-prevencao-de-riscos [12] Cláusulas-padrão da ANPD: o que muda a partir de 23 de agosto de 2025 - https://cmalaw.com/conteudos/clausulas-padrao-da-anpd-o-que-muda-a-partir-de-23-de-agosto-de-2025/ [13] A função da cláusula Tag Along | Bernardo Fernandes Advocacia - https://bernardofernandes.adv.br/a-funcao-da-clausula-tag-along [14] Cláusulas de Lock-Up e Drag Along em Acordos De Sócios: Tendências E Jurisprudência – Junqueira de Carvalho e Murgel - https://jcm.adv.br/artigo/clausulas-de-lock-up-e-drag-along-em-acordos-de-socios-tendencias-e-jurisprudencia/ [15] LEGITIMIDADE DA SOCIEDADE NA EXECUÇÃO ESPECÍFICA DE ACORDO DE QUOTISTAS. - https://eliansanchez.adv.br/legitimidade-da-sociedade-na-execucao-especifica-de-acordo-de-quotistas/ [16] JUCESC - Junta Comercial do Estado de Santa Catarina - Assinatura com segurança em dobro - https://www.jucesc.sc.gov.br/index.php/institucional/noticias/695-assinatura-com-seguranca-em-dobro-drei-determinou [17] Verificação em duas etapas será obrigatória ao assinar documentos com conta gov.br no Simplifica-ES - https://jucees.es.gov.br/Not%C3%ADcia/verificacao-em-duas-etapas-sera-obrigatoria-ao-assinar-documentos-com-conta-gov-br-no-simplifica-es [18] Junta Comercial do Paraná on Instagram: "Assinaturas com GOV.BR terão verificação em duas etapas obrigatória! A partir de 04/08/2025 Regra válida em todo o Brasil, conforme o DREI (Ofício Circular SEI nº 183/2025)
++Atualizada 13-11-2023.xlsx - https://jucis.df.gov.br/wp-conteudo/uploads/2025/08/Atualizada-13-11-2023.xlsx-1.pdf [7] Elias, Matias Advogados - https://www.eliasmatias.com/publicacao/em-informa-stj-valida-distribuicao-de-lucros-com-base-nos-dias-efetivamente-trabalhados/1047 [8] STJ valida liberdade contratual para distribuição de lucros de sócios com base em dias trabalhados. - https://boletim.prolikadvogados.com.br/2025/06/12/stj-valida-liberdade-contratual-para-distribuicao-de-lucros-de-socios-com-base-em-dias-trabalhados/ [9] [Resumo] Informativo de Jurisprudência do STJ - Edição 842 - https://www.jusbrasil.com.br/artigos/resumo-informativo-de-jurisprudencia-do-stj-edicao-842/3230724397 [10] Microsoft Word - Documento1 - https://lavioletera.com.br/uploads/Termo_Geral__LGPD_Compliance_Confidencialidade_e_Anticorrupo.pdf?srsltid=AfmBOooC4xzBIqrXGRT6vL7ddUPUHEsqhwzzXYsgPQJfGuNqc2IVBVKz [11] Compliance empresarial: estratégias legais para prevenção de riscos - https://jusdocs.com/blog/compliance-empresarial-estrategias-legais-para-prevencao-de-riscos [12] Cláusulas-padrão da ANPD: o que muda a partir de 23 de agosto de 2025 - https://cmalaw.com/conteudos/clausulas-padrao-da-anpd-o-que-muda-a-partir-de-23-de-agosto-de-2025/ [13] A função da cláusula Tag Along | Bernardo Fernandes Advocacia - https://bernardofernandes.adv.br/a-funcao-da-clausula-tag-along [14] Cláusulas de Lock-Up e Drag Along em Acordos De Sócios: Tendências E Jurisprudência – Junqueira de Carvalho e Murgel - https://jcm.adv.br/artigo/clausulas-de-lock-up-e-drag-along-em-acordos-de-socios-tendencias-e-jurisprudencia/ [15] LEGITIMIDADE DA SOCIEDADE NA EXECUÇÃO ESPECÍFICA DE ACORDO DE QUOTISTAS. - https://eliansanchez.adv.br/legitimidade-da-sociedade-na-execucao-especifica-de-acordo-de-quotistas/ [16] JUCESC - Junta Comercial do Estado de Santa Catarina - Assinatura com segurança em dobro - https://www.jucesc.sc.gov.br/index.php/institucional/noticias/695-assinatura-com-seguranca-em-dobro-drei-determinou [17] Verificação em duas etapas será obrigatória ao assinar documentos com conta gov.br no Simplifica-ES - https://jucees.es.gov.br/Not%C3%ADcia/verificacao-em-duas-etapas-sera-obrigatoria-ao-assinar-documentos-com-conta-gov-br-no-simplifica-es [18] Junta Comercial do Paraná on Instagram: "Assinaturas com GOV.BR terão verificação em duas etapas obrigatória! A partir de 04/08/2025 Regra válida em todo o Brasil, conforme o DREI (Ofício Circular SEI nº 183/2025)
+ </w:t>
+       
+ </w:r>
+@@ -9348,10 +9508,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1816A0A0" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="4A8AF099" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9379,10 +9539,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="371CC74F" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3598F2ED" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9410,10 +9570,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="6616E97B" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3A1CCD66" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9441,10 +9601,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1807EDFA" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="48CE0779" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9479,6 +9639,8 @@
+       
+ <w:r>
+         
++<w:lastRenderedPageBreak/>
++        
+ <w:t>
+ Acesse o aplicativo gov.br no celular.
+ </w:t>
+@@ -9488,10 +9650,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="03413E94" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3EFA75B9" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9535,10 +9697,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="790A746D" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="69C941BF" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9582,10 +9744,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="21217070" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="7DDB47E3" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9613,10 +9775,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1AE3463E" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="3E84D5FA" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9644,10 +9806,10 @@
+ </w:p>
+     
+ <w:p 
+-w:rsidR="00B29C26" 
++w14:paraId="1C0A6BED" 
+-w:rsidRDefault="00000000" 
++w14:textId="77777777" 
+-w14:paraId="737DCA98" 
++w:rsidR="006E1EB0" 
+-w14:textId="77777777"
++w:rsidRDefault="00000000"
+ >
+       
+ <w:pPr>
+@@ -9667,7 +9829,17 @@
+ <w:r>
+         
+ <w:t>
+-📣 Contadores: orientem seus clientes para evitar atrasos!" - https://www.instagram.com/reel/DMvcnL9Nnh-/ [19] STJ – Judiciário não pode apreciar validade de cláusula compromissória antes da sentença arbitral « CBAr – Comitê Brasileiro de Arbitragem - https://cbar.org.br/site/en/stj-judiciario-nao-pode-apreciar-validade-de-clausula-compromissoria-antes-da-sentenca-arbitral/ [20] https://fcaradv.com.br/en/news-and-articles/stj-reconhece-a-validade-de-clausula-compromissoria-em-discussao-contratual-entre-empresas-em-recuperacao-judicial - https://fcaradv.com.br/en/news-and-articles/stj-reconhece-a-validade-de-clausula-compromissoria-em-discussao-contratual-entre-empresas-em-recuperacao-judicial [21] Just a moment... - https://www.stj.jus.br/sites/portalp/Paginas/Comunicacao/Noticias/2025/14082025-Inclusao-de-clausula-arbitral-em-estatuto-de-associacao-civil-nao-se-submete-as-exigencias-do-contrato-de-adesao.aspx [22] Como estruturar o quadro societário da sua empresa - https://societariodigital.com.br/estruturar-quadro-societario/ [23] Alterações Societárias: O Que Muda em 2025 e Como Registrar (RN e SC) - https://hentzadvocacia.adv.br/blog/alteracoes-societarias-rn-sc/ [24] L14451 - https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/lei/l14451.htm [25] Cessão de Quotas Sociais na Sociedade Limitada - https://mmaadvocacia.com.br/cessao-de-quotas/ [26] Just a moment... - https://www.coad.com.br/files/trib/html/pesquisa/lc/em19113.htm? [27] What is the Difference between a ROFO and ROFR? - Rez Legal - https://rezlegal.com/2018/08/what-is-the-difference-between-a-rofo-and-rofr/ [28] Direito de Preferência dos Sócios na Aquisição de Quotas - Jurisprudência | Jusbrasil - https://www.jusbrasil.com.br/jurisprudencia/busca?q=direito+de+preferência+dos+sócios+na+aquisição+de+quotas [29] Cessão de quotas empresariais e contrato social - https://www.galvaoesilva.com/blog/direito-empresarial/cessao-de-quotas-empresariais/ [30] Cessão de Quotas em Sociedades Limitadas: Requisitos e Responsabilidades da cessão de quotas a terceiros, no âmbito do Código Civil | BBMOV – Sociedade de Advogados - https://www.bbmov.adv.br/2023/10/31/cessao-de-quotas-em-sociedades-limitadas-requisitos-e-responsabilidades-da-cessao-de-quotas-a-terceiros-no-ambito-do-codigo-civil/ [31] VK | Welcome! - https://vk.com/video-229983937_456239034 [32] Pre-Emptive Rights Explained: Types, Variants, and How to Structure Them in Your Shareholders’ Agreement - https://www.equitylist.co/blog-post/pre-emptive-rights [33] Cessão de Quotas em Sociedades Limitadas: Quais São os Requisitos e Como Funciona o Direito de Preferência? - https://www.jusbrasil.com.br/artigos/cessao-de-quotas-em-sociedades-limitadas-quais-sao-os-requisitos-e-como-funciona-o-direito-de-preferencia/2811015922 [34] Art. 1057 da Lei nº 10.406, de 10 de janeiro de 2002 - https://www.jusbrasil.com.br/topicos/10667614/artigo-1057-da-lei-n-10406-de-10-de-janeiro-de-2002 [35] Shareholders’ agreement: pre-emptive right to purchase shares and other shareholder protection mechanisms — REVERA - https://cyprus.revera.legal/ru/info-centr/news-and-analytical-materials/187-preimushhestvennoe-pravo-pokupki-akcij-i-drugie-mexanizmy-zashhity-akcionerov/ [36] Right of first refusal - https://en.wikipedia.org/wiki/Right_of_first_refusal [37] Exclusão de Sócio em Sociedade Limitada no Brasil: Entenda Seus Direitos e Alternativas - https://advogadosmgf.com.br/exclusao-de-socio-em-ltda/
++📣 Contadores: orientem seus clientes para evitar atrasos!" - https://www.instagram.com/reel/DMvcnL9Nnh-/ [19] STJ – Judiciário não pode apreciar validade de cláusula compromissória antes da sentença arbitral « CBAr – Comitê Brasileiro de Arbitragem - https://cbar.org.br/site/en/stj-judiciario-nao-pode-apreciar-validade-de-clausula-compromissoria-antes-da-sentenca-arbitral/ [20] https://fcaradv.com.br/en/news-and-articles/stj-reconhece-a-validade-de-clausula-compromissoria-em-discussao-contratual-entre-empresas-em-recuperacao-judicial - https://fcaradv.com.br/en/news-and-articles/stj-reconhece-a-validade-de-clausula-compromissoria-em-discussao-contratual-entre-empresas-em-recuperacao-judicial [21] Just a moment... - https://www.stj.jus.br/sites/portalp/Paginas/Comunicacao/Noticias/2025/14082025-Inclusao-de-clausula-arbitral-em-estatuto-de-associacao-civil-nao-se-submete-as-exigencias-do-contrato-de-adesao.aspx [22] Como estruturar o quadro societário da sua empresa - https://societariodigital.com.br/estruturar-quadro-societario/ [23] Alterações Societárias: O Que Muda em 2025 e Como Registrar (RN e SC) - https://hentzadvocacia.adv.br/blog/alteracoes-societarias-rn-sc/ [24] L14451 - https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/lei/l14451.htm [25] Cessão de Quotas Sociais na Sociedade Limitada - https://mmaadvocacia.com.br/cessao-de-quotas/ [26] Just a moment... - https://www.coad.com.br/files/trib/html/pesquisa/lc/em19113.htm? [27] What is the Difference between a ROFO and ROFR? - Rez Legal - https://rezlegal.com/2018/08/what-is-the-difference-between-a-rofo-and-rofr/ [28] Direito de Preferência dos Sócios na Aquisição de Quotas - Jurisprudência | Jusbrasil - https://www.jusbrasil.com.br/jurisprudencia/busca?q=direito+de+preferência+dos+sócios+na+aquisição+de+quotas [29] Cessão de quotas empresariais e contrato social - https://www.galvaoesilva.com/blog/direito-empresarial/cessao-de-quotas-empresariais/ [30] Cessão de Quotas em Sociedades Limitadas: Requisitos e Responsabilidades da cessão de quotas a terceiros, no âmbito do Código Civil | BBMOV – Sociedade de Advogados - https://www.bbmov.adv.br/2023/10/31/cessao-de-quotas-em-sociedades-limitadas-requisitos-e-responsabilidades-da-cessao-de-quotas-a-terceiros-no-ambito-do-codigo-
++</w:t>
++      
++</w:r>
++      
++<w:r>
++        
++<w:lastRenderedPageBreak/>
++        
++<w:t>
++civil/ [31] VK | Welcome! - https://vk.com/video-229983937_456239034 [32] Pre-Emptive Rights Explained: Types, Variants, and How to Structure Them in Your Shareholders’ Agreement - https://www.equitylist.co/blog-post/pre-emptive-rights [33] Cessão de Quotas em Sociedades Limitadas: Quais São os Requisitos e Como Funciona o Direito de Preferência? - https://www.jusbrasil.com.br/artigos/cessao-de-quotas-em-sociedades-limitadas-quais-sao-os-requisitos-e-como-funciona-o-direito-de-preferencia/2811015922 [34] Art. 1057 da Lei nº 10.406, de 10 de janeiro de 2002 - https://www.jusbrasil.com.br/topicos/10667614/artigo-1057-da-lei-n-10406-de-10-de-janeiro-de-2002 [35] Shareholders’ agreement: pre-emptive right to purchase shares and other shareholder protection mechanisms — REVERA - https://cyprus.revera.legal/ru/info-centr/news-and-analytical-materials/187-preimushhestvennoe-pravo-pokupki-akcij-i-drugie-mexanizmy-zashhity-akcionerov/ [36] Right of first refusal - https://en.wikipedia.org/wiki/Right_of_first_refusal [37] Exclusão de Sócio em Sociedade Limitada no Brasil: Entenda Seus Direitos e Alternativas - https://advogadosmgf.com.br/exclusao-de-socio-em-ltda/
+ </w:t>
+       
+ </w:r>
+@@ -9675,7 +9847,7 @@
+ </w:p>
+     
+ <w:sectPr 
+-w:rsidR="00F92A02"
++w:rsidR="006E1EB0"
+ >
+       
+ <w:pgSz 
