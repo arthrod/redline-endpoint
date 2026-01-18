@@ -6,213 +6,115 @@ Complete guide to configure DNS and expose the Redline API to RapidAPI.
 
 | Resource | Value |
 |----------|-------|
-| **Ingress IP** | `65.21.136.37` |
-| **Ingress Ports** | HTTP: 31916, HTTPS: 30397 |
-| **Current Host** | `redline-api.yourdomain.com` (placeholder) |
+| **Live URL** | `https://redline-api.cicero.im` |
+| **Service ClusterIP** | `10.43.106.138:8080` |
 | **Namespace** | `redline-api` |
+| **Tunnel** | Cloudflare Tunnel (cloudflared systemd service) |
 
-## Step 1: Choose Your Domain
+## Cloudflare Tunnel Configuration (Current Setup)
 
-You need a domain or subdomain for the API. Options:
+The API uses Cloudflare Tunnel (cloudflared) running as a systemd service on the host.
 
-1. **Subdomain of existing domain**: `api.yourdomain.com` or `redline.yourdomain.com`
-2. **Dedicated domain**: `redline-api.com`
-3. **Free subdomain services**: nip.io, sslip.io (for testing only)
+### Tunnel Config
 
-### Quick Test with nip.io (No DNS Required)
+| Setting | Value |
+|---------|-------|
+| Hostname | `redline-api.cicero.im` |
+| Service | `http://10.43.106.138:8080` (ClusterIP) |
+| TLS | Handled by Cloudflare (automatic) |
 
-For immediate testing without DNS setup:
+### How It Works
+
 ```
-http://redline-api.65.21.136.37.nip.io/health
-```
-
-## Step 2: Configure DNS Records
-
-Add these DNS records at your domain registrar or DNS provider:
-
-### A Record (Required)
-```
-Type: A
-Name: redline-api (or your chosen subdomain)
-Value: 65.21.136.37
-TTL: 300 (or automatic)
+Internet → Cloudflare Edge → cloudflared (host) → ClusterIP → K8s Pods
 ```
 
-### Example for Common Providers
+### Updating the Tunnel
 
-**Cloudflare:**
-1. Go to DNS settings
-2. Add record: Type=A, Name=`redline-api`, Content=`65.21.136.37`
-3. Proxy status: DNS only (orange cloud OFF) for direct access
-
-**AWS Route 53:**
-1. Go to Hosted Zone
-2. Create Record: Type=A, Record name=`redline-api`, Value=`65.21.136.37`
-
-**Google Cloud DNS:**
-```bash
-gcloud dns record-sets create redline-api.yourdomain.com. \
-  --zone=YOUR_ZONE_NAME \
-  --type=A \
-  --ttl=300 \
-  --rrdatas=65.21.136.37
-```
-
-**GoDaddy/Namecheap:**
-1. DNS Management → Add Record
-2. Type: A, Host: `redline-api`, Points to: `65.21.136.37`
-
-## Step 3: Update Kubernetes Ingress
-
-Once you have your domain, update the ingress:
+If the ClusterIP changes (e.g., after service recreation):
 
 ```bash
-# Edit the ingress host
-kubectl patch ingress redline-api-ingress -n redline-api --type='json' \
-  -p='[{"op": "replace", "path": "/spec/rules/0/host", "value": "YOUR_ACTUAL_DOMAIN"}]'
+# Get new ClusterIP
+kubectl get svc redline-api -n redline-api -o jsonpath='{.spec.clusterIP}'
+
+# Update in Cloudflare Zero Trust Dashboard:
+# Networks → Tunnels → [your tunnel] → Public Hostnames → Edit
 ```
 
-Or edit the file and reapply:
+### Test the Endpoint
 
 ```bash
-# Edit k8s/ingress.yaml - change the host line
-# Then apply:
-kubectl apply -f k8s/ingress.yaml
+# Health check
+curl https://redline-api.cicero.im/health
+
+# Full redline test (requires proxy secret)
+curl -X POST https://redline-api.cicero.im/api/compare \
+  -H "X-RapidAPI-Proxy-Secret: YOUR_SECRET" \
+  -F "Original=@original.docx" \
+  -F "Modified=@modified.docx" \
+  --output redlined.docx
 ```
 
-## Step 4: Verify DNS Propagation
+## Configure RapidAPI
 
-Check if DNS is working:
-
-```bash
-# Check DNS resolution
-dig redline-api.yourdomain.com +short
-# Should return: 65.21.136.37
-
-# Or use nslookup
-nslookup redline-api.yourdomain.com
-
-# Test the endpoint
-curl http://redline-api.yourdomain.com/health
+### Base URL
+Set in RapidAPI Provider Dashboard → Hub Listing → Settings:
+```
+https://redline-api.cicero.im
 ```
 
-### DNS Propagation Tools
-- https://dnschecker.org
-- https://www.whatsmydns.net
-
-DNS propagation typically takes 5-30 minutes, but can take up to 48 hours.
-
-## Step 5: Configure TLS/HTTPS (Recommended)
-
-For production, enable HTTPS:
-
-### Option A: cert-manager with Let's Encrypt
-
-```bash
-# Install cert-manager if not present
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.0/cert-manager.yaml
-
-# Create ClusterIssuer
-cat <<EOF | kubectl apply -f -
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-prod
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: your-email@example.com
-    privateKeySecretRef:
-      name: letsencrypt-prod
-    solvers:
-    - http01:
-        ingress:
-          class: nginx
-EOF
+### Health Check URL
 ```
-
-Then update ingress annotations:
-
-```yaml
-# Add to k8s/ingress.yaml metadata.annotations:
-cert-manager.io/cluster-issuer: "letsencrypt-prod"
-
-# Add TLS section to spec:
-spec:
-  tls:
-    - hosts:
-        - redline-api.yourdomain.com
-      secretName: redline-api-tls
+https://redline-api.cicero.im/health
 ```
-
-### Option B: Cloudflare Proxy (Easy)
-
-1. Enable Cloudflare proxy (orange cloud ON)
-2. SSL/TLS mode: Full (strict)
-3. Cloudflare handles certificates automatically
-
-## Step 6: Configure RapidAPI Base URL
-
-Once your domain is working:
-
-1. Go to RapidAPI Provider Dashboard
-2. Navigate to: Hub Listing → Settings → Base URL
-3. Set Base URL to: `https://redline-api.yourdomain.com` (or HTTP if no TLS)
-4. Save and test
-
-## Step 7: Update Health Check URL
-
-In RapidAPI settings:
-- Health Check URL: `https://redline-api.yourdomain.com/health`
-- Expected response: HTTP 200
 
 ## Verification Checklist
 
-- [ ] DNS A record created pointing to `65.21.136.37`
-- [ ] DNS propagated (verified with dig/nslookup)
-- [ ] Ingress host updated to actual domain
-- [ ] Health endpoint responding: `curl https://yourdomain.com/health`
-- [ ] TLS certificate issued (if using HTTPS)
+- [x] Cloudflare Tunnel configured with hostname `redline-api.cicero.im`
+- [x] Service pointing to ClusterIP `10.43.106.138:8080`
+- [x] Health endpoint responding
+- [x] TLS handled by Cloudflare (automatic)
 - [ ] RapidAPI Base URL configured
 - [ ] RapidAPI Health Check passing
 
 ## Troubleshooting
 
-### DNS Not Resolving
-```bash
-# Check if record exists
-dig redline-api.yourdomain.com ANY
+### Tunnel Not Connecting (502 Error)
 
-# Check from different DNS servers
-dig @8.8.8.8 redline-api.yourdomain.com
-dig @1.1.1.1 redline-api.yourdomain.com
+```bash
+# Check if ClusterIP is reachable from host
+curl http://10.43.106.138:8080/health
+
+# If not, get current ClusterIP and update tunnel config
+kubectl get svc redline-api -n redline-api
+
+# Check cloudflared status
+sudo systemctl status cloudflared
+sudo journalctl -u cloudflared -f
 ```
 
-### Ingress Not Responding
-```bash
-# Check ingress status
-kubectl describe ingress redline-api-ingress -n redline-api
+### Pods Not Running
 
-# Check ingress controller logs
-kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx
+```bash
+# Check pod status
+kubectl get pods -n redline-api -l app=redline-api
+
+# Check logs
+kubectl logs -n redline-api -l app=redline-api
 ```
 
-### Certificate Issues
-```bash
-# Check certificate status
-kubectl get certificate -n redline-api
-kubectl describe certificate redline-api-tls -n redline-api
+### ClusterIP Changed
 
-# Check cert-manager logs
-kubectl logs -n cert-manager -l app=cert-manager
-```
+If service was recreated:
+1. Get new IP: `kubectl get svc redline-api -n redline-api`
+2. Update Cloudflare Tunnel: Zero Trust → Tunnels → Edit hostname
 
 ## Quick Reference
 
 | Item | Value |
 |------|-------|
-| Ingress IP | `65.21.136.37` |
+| Live URL | `https://redline-api.cicero.im` |
 | Health Endpoint | `/health` |
 | API Endpoint | `POST /api/compare` |
 | Namespace | `redline-api` |
-| Service | `redline-api:8080` |
+| Service ClusterIP | `10.43.106.138:8080` |

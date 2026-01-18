@@ -144,7 +144,7 @@ Body: [Binary DOCX file]
 ## SECURITY CONFIGURATION
 
 ### Gateway DNS
-Use the RapidAPI gateway: `redline-api.p.rapidapi.com` (will be assigned)
+Use the RapidAPI gateway: `redline-api.cicero.im` (will be assigned)
 
 ### Firewall Settings
 
@@ -189,8 +189,8 @@ Generate professional redlined documents by comparing two Word DOCX files. Perfe
 
 ```bash
 curl --request POST \
-  --url https://redline-api.p.rapidapi.com/api/compare \
-  --header 'X-RapidAPI-Host: redline-api.p.rapidapi.com' \
+  --url https://redline-api.cicero.im/api/compare \
+  --header 'X-RapidAPI-Host: redline-api.cicero.im' \
   --header 'X-RapidAPI-Key: YOUR_API_KEY' \
   --form 'Original=@original.docx' \
   --form 'Modified=@modified.docx' \
@@ -201,8 +201,8 @@ curl --request POST \
 
 ```bash
 curl --request POST \
-  --url https://redline-api.p.rapidapi.com/api/compare \
-  --header 'X-RapidAPI-Host: redline-api.p.rapidapi.com' \
+  --url https://redline-api.cicero.im/api/compare \
+  --header 'X-RapidAPI-Host: redline-api.cicero.im' \
   --header 'X-RapidAPI-Key: YOUR_API_KEY' \
   --form 'Original=@original.docx' \
   --form 'Modified=@modified.docx' \
@@ -217,11 +217,11 @@ curl --request POST \
 ```python
 import requests
 
-url = "https://redline-api.p.rapidapi.com/api/compare"
+url = "https://redline-api.cicero.im/api/compare"
 
 headers = {
     "X-RapidAPI-Key": "YOUR_API_KEY",
-    "X-RapidAPI-Host": "redline-api.p.rapidapi.com"
+    "X-RapidAPI-Host": "redline-api.cicero.im"
 }
 
 files = {
@@ -254,13 +254,13 @@ form.append('Modified', fs.createReadStream('modified.docx'));
 form.append('Author', 'Reviewer Name'); // Optional
 
 const response = await axios.post(
-  'https://redline-api.p.rapidapi.com/api/compare',
+  'https://redline-api.cicero.im/api/compare',
   form,
   {
     headers: {
       ...form.getHeaders(),
       'X-RapidAPI-Key': 'YOUR_API_KEY',
-      'X-RapidAPI-Host': 'redline-api.p.rapidapi.com'
+      'X-RapidAPI-Host': 'redline-api.cicero.im'
     },
     responseType: 'arraybuffer'
   }
@@ -281,10 +281,10 @@ content.Add(new StreamContent(File.OpenRead("modified.docx")), "Modified", "modi
 content.Add(new StringContent("Reviewer Name"), "Author"); // Optional
 
 client.DefaultRequestHeaders.Add("X-RapidAPI-Key", "YOUR_API_KEY");
-client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "redline-api.p.rapidapi.com");
+client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "redline-api.cicero.im");
 
 var response = await client.PostAsync(
-    "https://redline-api.p.rapidapi.com/api/compare",
+    "https://redline-api.cicero.im/api/compare",
     content
 );
 
@@ -312,10 +312,10 @@ RequestBody body = new MultipartBody.Builder()
     .build();
 
 Request request = new Request.Builder()
-    .url("https://redline-api.p.rapidapi.com/api/compare")
+    .url("https://redline-api.cicero.im/api/compare")
     .post(body)
     .addHeader("X-RapidAPI-Key", "YOUR_API_KEY")
-    .addHeader("X-RapidAPI-Host", "redline-api.p.rapidapi.com")
+    .addHeader("X-RapidAPI-Host", "redline-api.cicero.im")
     .build();
 
 Response response = client.newCall(request).execute();

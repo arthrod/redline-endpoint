@@ -24,7 +24,7 @@ info:
     name: API Support
     url: https://github.com/arthrod/redline-endpoint
 servers:
-  - url: https://redline-document-comparison.p.rapidapi.com
+  - url: https://redline-api.cicero.im
     description: RapidAPI Gateway
 paths:
   /api/compare:
@@ -162,7 +162,7 @@ components:
       type: apiKey
       in: header
       name: X-RapidAPI-Host
-      description: The API host (redline-document-comparison.p.rapidapi.com)
+      description: The API host (redline-api.cicero.im)
 security:
   - RapidAPIKey: []
     RapidAPIHost: []
