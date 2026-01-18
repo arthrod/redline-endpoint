@@ -1,7 +1,7 @@
 using FastEndpoints;
 using Docxodus;
-using DocumentFormat.OpenXml.Packaging;
-using System.Xml.Linq;
+using Clippit;
+using Clippit.Word;
 
 namespace RedlineApi.Endpoints.Compare;
 
@@ -14,19 +14,15 @@ public class CompareRequest
 
 public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
 {
-    // PowerTools namespace that causes Word warnings
-    private static readonly XNamespace Pt14 = "http://powertools.codeplex.com/2011";
-
     public override void Configure()
     {
         Post("/api/compare");
         AllowFileUploads();
-        AllowAnonymous(); // Remove this line to require authentication
+        // Requires Bearer token authentication
     }
 
     public override async Task HandleAsync(CompareRequest req, CancellationToken ct)
     {
-        // Validate files are DOCX
         if (!req.Original.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase) ||
             !req.Modified.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
         {
@@ -37,33 +33,31 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
 
         try
         {
-            // Read files into byte arrays
             using var originalStream = new MemoryStream();
             using var modifiedStream = new MemoryStream();
 
             await req.Original.CopyToAsync(originalStream, ct);
             await req.Modified.CopyToAsync(modifiedStream, ct);
 
-            // Create WmlDocuments from byte arrays
-            var originalDoc = new WmlDocument("original.docx", originalStream.ToArray());
-            var modifiedDoc = new WmlDocument("modified.docx", modifiedStream.ToArray());
+            // Step 1: Use Docxodus for document comparison
+            var originalDoc = new Docxodus.WmlDocument("original.docx", originalStream.ToArray());
+            var modifiedDoc = new Docxodus.WmlDocument("modified.docx", modifiedStream.ToArray());
 
-            // Configure comparison settings
-            var settings = new WmlComparerSettings
+            var settings = new Docxodus.WmlComparerSettings
             {
                 AuthorForRevisions = req.Author ?? "Redline API",
                 DetailThreshold = 0
             };
 
-            // Perform comparison
-            var result = WmlComparer.Compare(originalDoc, modifiedDoc, settings);
+            var result = Docxodus.WmlComparer.Compare(originalDoc, modifiedDoc, settings);
+            Logger.LogInformation("Docxodus comparison complete, document size: {Size} bytes", result.DocumentByteArray.Length);
 
-            // Clean the output to remove PowerTools internal attributes
-            var cleanedBytes = CleanPowerToolsNamespace(result.DocumentByteArray);
+            // Step 2: Use Clippit DocumentBuilder to rebuild the document
+            var repairedBytes = RepairWithClippit(result.DocumentByteArray);
+            Logger.LogInformation("Clippit repair complete, document size: {Size} bytes", repairedBytes.Length);
 
-            // Return the redlined document
             await Send.BytesAsync(
-                cleanedBytes,
+                repairedBytes,
                 fileName: "redlined.docx",
                 contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 cancellation: ct
@@ -78,95 +72,22 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
     }
 
     /// <summary>
-    /// Removes PowerTools pt14 namespace and attributes from the document
-    /// to prevent Word "unreadable content" warnings
+    /// Uses Clippit DocumentBuilder to rebuild the document.
+    /// Clippit is a modern fork of OpenXmlPowerTools for .NET 8/10.
     /// </summary>
-    private static byte[] CleanPowerToolsNamespace(byte[] docBytes)
+    private static byte[] RepairWithClippit(byte[] docBytes)
     {
-        using var stream = new MemoryStream();
-        stream.Write(docBytes, 0, docBytes.Length);
-        stream.Position = 0;
+        // Create a Clippit WmlDocument from the byte array
+        var sourceDoc = new Clippit.Word.WmlDocument("source.docx", docBytes);
 
-        using (var doc = WordprocessingDocument.Open(stream, true))
+        // Use DocumentBuilder to rebuild the document
+        var sources = new List<ISource>
         {
-            // Clean main document part
-            if (doc.MainDocumentPart != null)
-            {
-                CleanPart(doc.MainDocumentPart);
+            new Clippit.Word.Source(sourceDoc)
+        };
 
-                // Clean styles part
-                if (doc.MainDocumentPart.StyleDefinitionsPart != null)
-                    CleanPart(doc.MainDocumentPart.StyleDefinitionsPart);
+        var rebuiltDoc = Clippit.Word.DocumentBuilder.BuildDocument(sources);
 
-                // Clean numbering part
-                if (doc.MainDocumentPart.NumberingDefinitionsPart != null)
-                    CleanPart(doc.MainDocumentPart.NumberingDefinitionsPart);
-
-                // Clean settings part
-                if (doc.MainDocumentPart.DocumentSettingsPart != null)
-                    CleanPart(doc.MainDocumentPart.DocumentSettingsPart);
-
-                // Clean footnotes
-                if (doc.MainDocumentPart.FootnotesPart != null)
-                    CleanPart(doc.MainDocumentPart.FootnotesPart);
-
-                // Clean endnotes
-                if (doc.MainDocumentPart.EndnotesPart != null)
-                    CleanPart(doc.MainDocumentPart.EndnotesPart);
-
-                // Clean headers
-                foreach (var headerPart in doc.MainDocumentPart.HeaderParts)
-                    CleanPart(headerPart);
-
-                // Clean footers
-                foreach (var footerPart in doc.MainDocumentPart.FooterParts)
-                    CleanPart(footerPart);
-            }
-        }
-
-        return stream.ToArray();
-    }
-
-    private static void CleanPart(OpenXmlPart part)
-    {
-        using var partStream = part.GetStream(FileMode.Open, FileAccess.ReadWrite);
-        var xdoc = XDocument.Load(partStream);
-
-        // Remove all pt14 attributes from all elements
-        foreach (var element in xdoc.Descendants())
-        {
-            var pt14Attrs = element.Attributes()
-                .Where(a => a.Name.Namespace == Pt14)
-                .ToList();
-
-            foreach (var attr in pt14Attrs)
-                attr.Remove();
-        }
-
-        // Remove pt14 namespace declaration from root
-        var root = xdoc.Root;
-        if (root != null)
-        {
-            var nsDeclarations = root.Attributes()
-                .Where(a => a.IsNamespaceDeclaration && a.Value == Pt14.NamespaceName)
-                .ToList();
-
-            foreach (var ns in nsDeclarations)
-                ns.Remove();
-
-            // Also remove pt14 from mc:Ignorable attribute if present
-            var mcIgnorable = root.Attribute(XName.Get("Ignorable", "http://schemas.openxmlformats.org/markup-compatibility/2006"));
-            if (mcIgnorable != null)
-            {
-                var values = mcIgnorable.Value.Split(' ')
-                    .Where(v => v != "pt14")
-                    .ToArray();
-                mcIgnorable.Value = string.Join(" ", values);
-            }
-        }
-
-        // Save back
-        partStream.SetLength(0);
-        xdoc.Save(partStream);
+        return rebuiltDoc.DocumentByteArray;
     }
 }
