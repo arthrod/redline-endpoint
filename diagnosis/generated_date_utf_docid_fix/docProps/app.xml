@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ap:Properties xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes" xmlns:ap="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">
+  <ap:Template>Normal.dotm</ap:Template>
+  <ap:TotalTime>0</ap:TotalTime>
+  <ap:Pages>18</ap:Pages>
+  <ap:Words>6023</ap:Words>
+  <ap:Characters>34333</ap:Characters>
+  <ap:Application>Microsoft Office Word</ap:Application>
+  <ap:DocSecurity>0</ap:DocSecurity>
+  <ap:Lines>286</ap:Lines>
+  <ap:Paragraphs>80</ap:Paragraphs>
+  <ap:ScaleCrop>false</ap:ScaleCrop>
+  <ap:HeadingPairs>
+    <vt:vector baseType="variant" size="2">
+      <vt:variant>
+        <vt:lpstr>Title</vt:lpstr>
+      </vt:variant>
+      <vt:variant>
+        <vt:i4>1</vt:i4>
+      </vt:variant>
+    </vt:vector>
+  </ap:HeadingPairs>
+  <ap:TitlesOfParts>
+    <vt:vector baseType="lpstr" size="1">
+      <vt:lpstr/>
+    </vt:vector>
+  </ap:TitlesOfParts>
+  <ap:Manager/>
+  <ap:Company/>
+  <ap:LinksUpToDate>false</ap:LinksUpToDate>
+  <ap:CharactersWithSpaces>40276</ap:CharactersWithSpaces>
+  <ap:SharedDoc>false</ap:SharedDoc>
+  <ap:HyperlinkBase/>
+  <ap:HyperlinksChanged>false</ap:HyperlinksChanged>
+  <ap:AppVersion>16.0000</ap:AppVersion>
+</ap:Properties>
