@@ -1,0 +1,21 @@
+services:
+  redline-endpoint:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redline-endpoint:latest
+    container_name: redline-endpoint
+    ports:
+      - "9898:9898"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:9898
+      RAPIDAPI_PROXY_SECRET: ${RAPIDAPI_PROXY_SECRET:-}
+      Jwt__Secret: ${JWT_SECRET:?JWT_SECRET is required}
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/9898 && printf \"GET /health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && grep -q \"200\" <&3'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
