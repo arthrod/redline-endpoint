@@ -8,6 +8,8 @@ public class CompareRequest
     public IFormFile Original { get; set; } = null!;
     public IFormFile Modified { get; set; } = null!;
     public string? Author { get; set; }
+    public double? DetailThreshold { get; set; }
+    public bool? CaseInsensitive { get; set; }
 }
 
 public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
@@ -51,14 +53,27 @@ public class CompareDocumentsEndpoint : Endpoint<CompareRequest>
             var originalDoc = new WmlDocument("original.docx", originalStream.ToArray());
             var modifiedDoc = new WmlDocument("modified.docx", modifiedStream.ToArray());
 
-            var settings = new WmlComparerSettings
+            WmlDocument result;
+            if (req.DetailThreshold.HasValue || req.CaseInsensitive.HasValue)
             {
-                AuthorForRevisions = req.Author ?? "User",
-                DetailThreshold = 0,
-                SimplifyMoveMarkup = true
-            };
+                var settings = new WmlComparerSettings
+                {
+                    AuthorForRevisions = req.Author ?? "Docxodus",
+                    DetailThreshold = req.DetailThreshold ?? 0.15,
+                    CaseInsensitive = req.CaseInsensitive ?? false
+                };
 
-            var result = WmlComparer.Compare(originalDoc, modifiedDoc, settings);
+                result = WmlComparer.Compare(originalDoc, modifiedDoc, settings);
+            }
+            else
+            {
+                var settings = new WmlComparerSettings
+                {
+                    AuthorForRevisions = req.Author ?? "Docxodus"
+                };
+
+                result = WmlComparer.Compare(originalDoc, modifiedDoc, settings);
+            }
 
             await Send.BytesAsync(
                 result.DocumentByteArray,
