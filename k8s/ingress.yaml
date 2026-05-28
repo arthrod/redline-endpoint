@@ -26,7 +26,7 @@ spec:
               service:
                 name: redline-api
                 port:
-                  number: 8080
+                  number: 9898
   # Uncomment and configure for TLS (not needed with Cloudflare Tunnel)
   # tls:
   #   - hosts:

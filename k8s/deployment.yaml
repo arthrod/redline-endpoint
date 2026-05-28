@@ -22,13 +22,13 @@ spec:
           image: ghcr.io/arthrod/redline-endpoint:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 9898
               protocol: TCP
           env:
             - name: ASPNETCORE_ENVIRONMENT
               value: "Production"
             - name: ASPNETCORE_URLS
-              value: "http://+:8080"
+              value: "http://+:9898"
             - name: RAPIDAPI_PROXY_SECRET
               valueFrom:
                 secretKeyRef:
@@ -44,7 +44,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 8080
+              port: 9898
             initialDelaySeconds: 15
             periodSeconds: 30
             timeoutSeconds: 5
@@ -52,7 +52,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 8080
+              port: 9898
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 3

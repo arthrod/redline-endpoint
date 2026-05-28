@@ -30,12 +30,12 @@ A high-performance .NET API that compares two DOCX documents and returns a redli
 dotnet run
 ```
 
-The API will start on `http://localhost:5003` by default.
+The API will start on `http://localhost:9898` by default.
 
 ### API Usage
 
 ```bash
-curl -X POST http://localhost:5003/api/compare \
+curl -X POST http://localhost:9898/api/compare \
   -F "Original=@original.docx" \
   -F "Modified=@modified.docx" \
   -F "Author=Your Name" \
@@ -65,13 +65,13 @@ docker build -t redline-api .
 ### Run
 
 ```bash
-docker run -p 8080:8080 redline-api
+docker run -p 9898:9898 redline-api
 ```
 
 ### With Authentication
 
 ```bash
-docker run -p 8080:8080 -e Jwt__Secret="your-secret-key-min-32-chars" redline-api
+docker run -p 9898:9898 -e Jwt__Secret="your-secret-key-min-32-chars" redline-api
 ```
 
 ## Configuration
@@ -80,7 +80,7 @@ docker run -p 8080:8080 -e Jwt__Secret="your-secret-key-min-32-chars" redline-ap
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ASPNETCORE_URLS` | Server binding URLs | `http://+:8080` |
+| `ASPNETCORE_URLS` | Server binding URLs | `http://+:9898` |
 | `ASPNETCORE_ENVIRONMENT` | Environment (Development/Production) | `Production` |
 | `Jwt__Secret` | JWT signing secret (min 32 chars) | - |
 

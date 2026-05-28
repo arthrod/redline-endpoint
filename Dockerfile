@@ -22,10 +22,10 @@ RUN apt-get update && apt-get install -y \
 COPY --from=build /app/publish .
 
 # Expose port
-EXPOSE 8080
+EXPOSE 9898
 
 # Set environment variables
-ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_URLS=http://+:9898
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 ENTRYPOINT ["dotnet", "RedlineApi.dll"]

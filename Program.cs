@@ -7,10 +7,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddFastEndpoints();
 
 // Add JWT Bearer Authentication
+var jwtSecret = builder.Configuration["Jwt:Secret"];
+if (string.IsNullOrWhiteSpace(jwtSecret))
+{
+    throw new InvalidOperationException("Missing required configuration: jwt_secret (Jwt:Secret / JWT_SECRET).");
+}
+
 builder.Services
     .AddAuthenticationJwtBearer(options =>
     {
-        options.SigningKey = builder.Configuration["Jwt:Secret"]!;
+        options.SigningKey = jwtSecret;
     })
     .AddAuthorization();
 
