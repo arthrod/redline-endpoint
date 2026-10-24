@@ -375,7 +375,7 @@ For technical issues or feature requests, contact support through RapidAPI.
 #### BASIC (Free Tier)
 ```
 Price: $0.00/month
-Quota: 10 requests/month
+Quota: 5 requests/month
 Rate Limit: 1 request/second
 ```
 *Purpose: Allow testing and evaluation*
